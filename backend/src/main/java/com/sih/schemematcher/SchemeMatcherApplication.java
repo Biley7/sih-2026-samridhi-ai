@@ -8,5 +8,8 @@ public class SchemeMatcherApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(SchemeMatcherApplication.class, args);
+        if (request == null || request.getState() == null) {
+    throw new IllegalArgumentException("Invalid recommendation request parameters.");
+}
     }
 }
