@@ -1,0 +1,54 @@
+[
+    {
+      "id": 101,
+      "title": "National Scheduled Castes Finance and Development Corporation Micro-Credit Scheme",
+      "category": "Micro Finance",
+      "minIncome": 0.00,
+      "maxIncome": 500000.00,
+      "minCost": 10000.00,
+      "maxCost": 140000.00,
+      "interestRateMin": 6.50,
+      "interestRateMax": 7.00,
+      "moratoriumMonths": 3,
+      "description": "Provides small financial assistance to SC entrepreneurs for setting up micro-enterprises and small business units."
+    },
+    {
+      "id": 102,
+      "title": "NSFDC Term Loan Scheme",
+      "category": "Term Loan",
+      "minIncome": 0.00,
+      "maxIncome": 500000.00,
+      "minCost": 140001.00,
+      "maxCost": 5000000.00,
+      "interestRateMin": 8.00,
+      "interestRateMax": 9.50,
+      "moratoriumMonths": 6,
+      "description": "Provides medium to long-term financial assistance for commercial, agricultural, and industrial enterprises up to ₹50.00 Lakhs."
+    },
+    {
+      "id": 103,
+      "title": "NSFDC Educational Loan Scheme",
+      "category": "Education Loan",
+      "minIncome": 0.00,
+      "maxIncome": 500000.00,
+      "minCost": 50000.00,
+      "maxCost": 2000000.00,
+      "interestRateMin": 4.00,
+      "interestRateMax": 6.00,
+      "moratoriumMonths": 12,
+      "description": "Concessional education loans for SC students pursuing professional and technical higher education in India or abroad."
+    },
+    {
+      "id": 104,
+      "title": "VCF-SC (Venture Capital Fund for Scheduled Castes)",
+      "category": "Equity / Term Loan",
+      "minIncome": 0.00,
+      "maxIncome": 500000.00,
+      "minCost": 500000.00,
+      "maxCost": 15000000.00,
+      "interestRateMin": 4.00,
+      "interestRateMax": 7.50,
+      "moratoriumMonths": 12,
+      "description": "Financial support to encourage entrepreneurship among SC youth driving technology, manufacturing, and innovation ventures."
+    }
+  ]

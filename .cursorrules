@@ -1,0 +1,32 @@
+# .cursorrules - Master AI Instructions for SIH 2026 Team
+
+# --- PROJECT PATHS & CONTRACTS ---
+# API Contract: docs/api-contract.md
+# Database Schema: docs/schema.sql
+# Seed Data: docs/data/
+# Frontend Directory: /frontend
+# Backend Directory: /backend
+
+# --- GENERAL CONVENTIONS ---
+# 1. API Route Prefix: /api/v1 (e.g., /api/v1/schemes/recommend)
+# 2. JSON/Java DTO Fields: camelCase (e.g., annualIncome, projectCost)
+# 3. PostgreSQL Columns: snake_case (e.g., annual_income, project_cost)
+# 4. Local Execution Ports:
+#    - Spring Boot Backend: http://localhost:8080
+#    - React Vite Frontend: http://localhost:5173
+
+# --- BACKEND RULES (Java Spring Boot) ---
+# - Location: /backend
+# - Java 17+, Maven, Spring Boot 3.x
+# - Use Lombok (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor)
+# - Enforce Global CORS for http://localhost:5173
+# - Refer strictly to docs/api-contract.md for DTO fields and REST endpoint definitions
+# - SQL Scripts & PostGIS spatial queries go in docs/schema.sql
+
+# --- FRONTEND RULES (React + Vite) ---
+# - Location: /frontend
+# - Styling: Tailwind CSS
+# - Icons: Lucide React (lucide-react)
+# - Maps: Leaflet / React-Leaflet
+# - API Integration: Axios client configured via import.meta.env.VITE_API_BASE_URL
+# - Map component state and payload structures directly to docs/api-contract.md

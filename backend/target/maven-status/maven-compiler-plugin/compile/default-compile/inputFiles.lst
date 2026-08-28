@@ -1,0 +1,17 @@
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\config\WebConfig.java
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\repository\SchemeRepository.java
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\service\SchemeMatcherService.java
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\controller\PartnerController.java
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\dto\SchemeRecommendationResponse.java
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\repository\ChannelPartnerRepository.java
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\controller\CalculatorController.java
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\dto\EMICalculationResponse.java
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\entity\ChannelPartner.java
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\entity\Scheme.java
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\service\EMICalculatorService.java
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\entity\UserApplication.java
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\SchemeMatcherApplication.java
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\dto\SchemeRecommendationRequest.java
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\controller\SchemeController.java
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\dto\EMICalculationRequest.java
+D:\codes\sih-2026-samridhi-ai\backend\src\main\java\com\sih\schemematcher\dto\PartnerDTO.java

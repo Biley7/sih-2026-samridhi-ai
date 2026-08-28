@@ -1,0 +1,57 @@
+[
+    {
+      "id": 1,
+      "name": "West Bengal Scheduled Castes Development Corporation",
+      "type": "SCA",
+      "district": "Kolkata",
+      "state": "West Bengal",
+      "latitude": 22.5697,
+      "longitude": 88.3697,
+      "activeFundStatus": true,
+      "npaRating": "LOW"
+    },
+    {
+      "id": 2,
+      "name": "Punjab National Bank - Central Branch",
+      "type": "PSB",
+      "district": "Kolkata",
+      "state": "West Bengal",
+      "latitude": 22.5726,
+      "longitude": 88.3639,
+      "activeFundStatus": true,
+      "npaRating": "LOW"
+    },
+    {
+      "id": 3,
+      "name": "State Bank of India - Regional Micro Finance Branch",
+      "type": "PSB",
+      "district": "Kolkata",
+      "state": "West Bengal",
+      "latitude": 22.5780,
+      "longitude": 88.3485,
+      "activeFundStatus": true,
+      "npaRating": "LOW"
+    },
+    {
+      "id": 4,
+      "name": "Bangiya Gramin Vikash Bank",
+      "type": "RRB",
+      "district": "North 24 Parganas",
+      "state": "West Bengal",
+      "latitude": 22.7219,
+      "longitude": 88.3932,
+      "activeFundStatus": true,
+      "npaRating": "MEDIUM"
+    },
+    {
+      "id": 5,
+      "name": "UCO Bank - Salt Lake Sector V Branch",
+      "type": "PSB",
+      "district": "North 24 Parganas",
+      "state": "West Bengal",
+      "latitude": 22.5735,
+      "longitude": 88.4331,
+      "activeFundStatus": false,
+      "npaRating": "HIGH"
+    }
+  ]
