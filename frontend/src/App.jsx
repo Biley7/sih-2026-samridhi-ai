@@ -10,21 +10,19 @@ import { TextScreen } from "@/components/text-screen"
 import { ResultsPreview } from "@/components/results-preview"
 import { MetricCards } from "@/components/metric-cards"
 import { usePreferences } from "@/hooks/use-preferences"
-import { matchSchemes, type InputMode, type MetricCard, type Scheme } from "@/lib/schemes"
-
-type Phase = "input" | "loading" | "results"
+import { matchSchemes } from "@/lib/schemes"
 
 export default function Page() {
   const { prefs, hydrated, save, update } = usePreferences()
 
-  const [mode, setMode] = useState<InputMode>("voice")
-  const [phase, setPhase] = useState<Phase>("input")
+  const [mode, setMode] = useState("voice")
+  const [phase, setPhase] = useState("input")
   const [query, setQuery] = useState("")
-  const [results, setResults] = useState<Scheme[]>([])
-  const [textSeed, setTextSeed] = useState<string | undefined>(undefined)
+  const [results, setResults] = useState([])
+  const [textSeed, setTextSeed] = useState(undefined)
   const [compact, setCompact] = useState(false)
-  const [activeMetric, setActiveMetric] = useState<MetricCard["key"] | null>(null)
-  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [activeMetric, setActiveMetric] = useState(null)
+  const searchTimer = useRef(null)
 
   // Sync local mode with saved preference once known.
   const initialisedMode = useRef(false)
@@ -34,7 +32,7 @@ export default function Page() {
   }
 
   const runSearch = useCallback(
-    (q: string) => {
+    (q) => {
       setQuery(q)
       setPhase("loading")
       setActiveMetric(null)
@@ -48,7 +46,7 @@ export default function Page() {
     [update],
   )
 
-  const highlightIssuer = useMemo<"Central" | "State" | null>(() => {
+  const highlightIssuer = useMemo(() => {
     if (activeMetric === "central") return "Central"
     if (activeMetric === "state") return "State"
     return null
@@ -62,7 +60,7 @@ export default function Page() {
     setActiveMetric(null)
   }
 
-  function switchToText(seed?: string) {
+  function switchToText(seed) {
     setTextSeed(seed)
     setMode("text")
     if (seed) runSearch(seed)
