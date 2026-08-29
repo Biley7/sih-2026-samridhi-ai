@@ -2,7 +2,6 @@
 
 import { useCallback, useMemo, useRef, useState } from "react"
 import { ArrowLeft, Mic, Settings2, WifiOff } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { SiteHeader } from "@/components/site-header"
 import { OnboardingCard } from "@/components/onboarding-card"
 import { VoiceScreen } from "@/components/voice-screen"

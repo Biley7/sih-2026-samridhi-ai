@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 33% 97%;
+    --foreground: 220 28% 14%;
+    --primary: 18 78% 42%;
+    --primary-foreground: 40 40% 98%;
+    --muted: 36 20% 92%;
+    --muted-foreground: 220 10% 40%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 28% 14%;
+    --surface: 36 28% 94%;
+    --surface-foreground: 220 28% 16%;
+    --border: 32 16% 84%;
+    --ring: 18 78% 42%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family:
+      "Segoe UI",
+      system-ui,
+      -apple-system,
+      sans-serif;
+  }
+}
