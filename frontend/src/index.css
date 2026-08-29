@@ -23,11 +23,25 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-slate-50 text-foreground antialiased;
     font-family:
       "Segoe UI",
       system-ui,
       -apple-system,
       sans-serif;
   }
+}
+
+.artisan-backdrop {
+  background-color: #f8fafc;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 0% -10%, rgba(234, 88, 12, 0.09), transparent 50%),
+    radial-gradient(ellipse 70% 45% at 100% 110%, rgba(22, 101, 52, 0.08), transparent 48%),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 10px,
+      rgba(15, 23, 42, 0.025) 11px,
+      transparent 12px
+    );
 }

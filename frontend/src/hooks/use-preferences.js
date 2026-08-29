@@ -6,6 +6,10 @@ const DEFAULT_PREFS = {
   language: "hi",
   defaultInput: "voice",
   lastSearch: "",
+  name: "",
+  trade: "",
+  income: "",
+  digiLockerLinked: false,
 }
 
 function readPrefs() {

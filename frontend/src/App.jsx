@@ -4,11 +4,13 @@ import { useCallback, useMemo, useRef, useState } from "react"
 import { ArrowLeft, Mic, Settings2, WifiOff } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { OnboardingCard } from "@/components/onboarding-card"
+import { ProfileStrip } from "@/components/profile-strip"
 import { VoiceScreen } from "@/components/voice-screen"
 import { TextScreen } from "@/components/text-screen"
 import { ResultsPreview } from "@/components/results-preview"
 import { MetricCards } from "@/components/metric-cards"
 import { usePreferences } from "@/hooks/use-preferences"
+import { DIGILOCKER_DEMO_PROFILE } from "@/lib/digilocker"
 import { matchSchemes } from "@/lib/schemes"
 
 export default function Page() {
@@ -65,10 +67,15 @@ export default function Page() {
     if (seed) runSearch(seed)
   }
 
+  function applyDigiLocker() {
+    update(DIGILOCKER_DEMO_PROFILE)
+    setTextSeed(DIGILOCKER_DEMO_PROFILE.trade)
+  }
+
   const language = prefs?.language ?? "hi"
 
   return (
-    <div className="min-h-dvh bg-background">
+    <div className="artisan-backdrop relative min-h-dvh">
       {hydrated && !prefs && (
         <OnboardingCard
           onComplete={(p) => {
@@ -89,18 +96,22 @@ export default function Page() {
         }}
       />
 
-      <main className="mx-auto max-w-3xl px-4 pb-16 md:px-6">
-        {/* Hero */}
+      <main className="relative mx-auto max-w-3xl px-4 pb-16 md:px-6">
         {phase === "input" && !compact && (
           <section className="pt-8 text-center md:pt-12">
-            <h1 className="text-balance text-2xl font-bold tracking-tight md:text-4xl">
-              Find government schemes for your craft
+            <h1 className="text-balance text-2xl font-extrabold tracking-[0.16em] text-[#0b3d6e] md:text-4xl">
+              NYAYASETU
             </h1>
             <p className="mx-auto mt-3 max-w-xl text-pretty text-sm text-muted-foreground md:text-base">
-              Ask in your own language by voice or text. NyayaSetu AI matches artisans, weavers,
-              and small entrepreneurs to subsidies that fit.
+              National Scheme Matching Portal for Marginalized Entrepreneurs
             </p>
           </section>
+        )}
+
+        {phase === "input" && prefs && (
+          <div className="mt-6">
+            <ProfileStrip profile={prefs} onDigiLocker={applyDigiLocker} />
+          </div>
         )}
 
         {compact && <CompactBanner />}

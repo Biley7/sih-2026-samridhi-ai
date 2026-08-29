@@ -69,18 +69,31 @@ export function VoiceScreen({ language, onConfirm, onSwitchToText }) {
       <p className="text-center text-sm text-muted-foreground">Speak your craft, location, or need</p>
 
       <div className="mt-5 flex flex-col items-center">
-        <button
-          type="button"
-          onClick={listening ? stopListening : startListening}
-          className={`flex size-20 items-center justify-center rounded-full transition-colors ${
-            listening ? "bg-primary text-primary-foreground" : "bg-surface text-primary"
-          }`}
-          aria-pressed={listening}
-          aria-label={listening ? "Stop recording" : "Start voice query"}
-        >
-          {listening ? <Square className="size-6" /> : <Mic className="size-8" />}
-        </button>
-        <p className="mt-3 text-xs text-muted-foreground">{listening ? "Listening…" : "Tap the mic to speak"}</p>
+        <div className="relative flex size-24 items-center justify-center">
+          {!listening && (
+            <>
+              <span className="absolute size-20 rounded-full bg-primary/25 animate-pulse-ring" />
+              <span className="absolute size-20 rounded-full bg-primary/20 animate-pulse-ring [animation-delay:400ms]" />
+            </>
+          )}
+          <button
+            type="button"
+            onClick={listening ? stopListening : startListening}
+            className={`relative z-10 flex size-20 items-center justify-center rounded-full transition-colors ${
+              listening ? "bg-primary text-primary-foreground" : "bg-surface text-primary shadow-sm"
+            }`}
+            aria-pressed={listening}
+            aria-label={listening ? "Stop recording" : "Start voice query"}
+          >
+            {listening ? <Square className="size-6" /> : <Mic className="size-8" />}
+          </button>
+        </div>
+        <p className="mt-3 text-xs font-medium text-foreground">
+          {listening ? "Listening…" : "Use Voice"}
+        </p>
+        <p className="mt-1 max-w-xs text-center text-[11px] leading-snug text-muted-foreground">
+          Speak in your native language (Hindi, Tamil, Bengali, Telugu)
+        </p>
       </div>
 
       <p className="mt-4 min-h-12 rounded-lg bg-surface px-3 py-3 text-center text-sm">

@@ -28,6 +28,16 @@ export default {
       borderRadius: {
         xl: "0.9rem",
       },
+      keyframes: {
+        "pulse-ring": {
+          "0%": { transform: "scale(1)", opacity: "0.5" },
+          "70%": { transform: "scale(1.55)", opacity: "0" },
+          "100%": { transform: "scale(1.55)", opacity: "0" },
+        },
+      },
+      animation: {
+        "pulse-ring": "pulse-ring 1.8s ease-out infinite",
+      },
     },
   },
   plugins: [],

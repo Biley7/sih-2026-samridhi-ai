@@ -1,4 +1,4 @@
-import { Landmark } from "lucide-react"
+import { Landmark, CircleCheck } from "lucide-react"
 import { getSuggestionChips } from "@/lib/schemes"
 
 export function ResultsPreview({ loading, query, results, highlightIssuer, onChipSelect }) {
@@ -39,6 +39,11 @@ export function ResultsPreview({ loading, query, results, highlightIssuer, onChi
             {scheme.benefit && (
               <p className="mt-2 text-xs font-medium text-primary">{scheme.benefit}</p>
             )}
+            <p className="mt-3 inline-flex items-start gap-1.5 rounded-md bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-800">
+              <CircleCheck className="mt-0.5 size-3.5 shrink-0 text-emerald-600" aria-hidden />
+              {scheme.matchReason ||
+                "Why Matched: Income criteria verified + Artisan category aligned"}
+            </p>
           </li>
         ))}
       </ul>

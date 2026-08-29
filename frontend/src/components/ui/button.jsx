@@ -11,6 +11,7 @@ export function Button({
     outline: "border border-border bg-card text-foreground hover:bg-muted",
     ghost: "bg-transparent text-foreground hover:bg-muted",
     secondary: "bg-surface text-surface-foreground hover:bg-muted",
+    digilocker: "bg-[#0066b3] text-white hover:bg-[#005299]",
   }
 
   const sizes = {

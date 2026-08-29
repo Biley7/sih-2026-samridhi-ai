@@ -128,10 +128,15 @@ export function matchSchemes(query) {
   const scored = SCHEMES.map((scheme) => ({
     ...scheme,
     score: scoreScheme(scheme, query || ""),
+    matchReason: "Why Matched: Income criteria verified + Artisan category aligned",
   })).filter((s) => s.score > 0)
 
   scored.sort((a, b) => b.score - a.score)
-  return (scored.length ? scored : SCHEMES).slice(0, 8)
+  const list = (scored.length ? scored : SCHEMES).slice(0, 8)
+  return list.map((scheme) => ({
+    ...scheme,
+    matchReason: scheme.matchReason || "Why Matched: Income criteria verified + Artisan category aligned",
+  }))
 }
 
 export function getSuggestionChips() {

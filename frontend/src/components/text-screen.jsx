@@ -34,15 +34,28 @@ export function TextScreen({ language, seed, onSearch, onSwitchToVoice }) {
           }
           className="mt-2 w-full resize-none rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none ring-ring focus:ring-2"
         />
-        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start">
           <Button type="submit" className="flex-1" disabled={!query.trim()}>
             <Search className="size-4" />
             Search schemes
           </Button>
-          <Button type="button" variant="outline" className="flex-1" onClick={onSwitchToVoice}>
-            <Mic className="size-4" />
-            Use voice
-          </Button>
+          <div className="flex flex-1 flex-col items-center">
+            <div className="relative w-full">
+              <span className="pointer-events-none absolute inset-0 rounded-lg bg-primary/20 animate-pulse-ring" />
+              <Button
+                type="button"
+                variant="outline"
+                className="relative z-10 w-full border-primary text-primary"
+                onClick={onSwitchToVoice}
+              >
+                <Mic className="size-4" />
+                Use Voice
+              </Button>
+            </div>
+            <p className="mt-1.5 text-center text-[11px] leading-snug text-muted-foreground">
+              Speak in your native language (Hindi, Tamil, Bengali, Telugu)
+            </p>
+          </div>
         </div>
       </form>
 
