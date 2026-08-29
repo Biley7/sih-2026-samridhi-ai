@@ -9,9 +9,16 @@ import { VoiceScreen } from "@/components/voice-screen"
 import { TextScreen } from "@/components/text-screen"
 import { ResultsPreview } from "@/components/results-preview"
 import { MetricCards } from "@/components/metric-cards"
+import { Footer } from "@/components/Footer"
+import { PartnerLocator } from "@/components/partner-locator"
+import { FinancialCalculator } from "@/components/financial-calculator"
+import { ASSISTANT_QUERY, NyayaAssistant } from "@/components/nyaya-assistant"
 import { usePreferences } from "@/hooks/use-preferences"
 import { DIGILOCKER_DEMO_PROFILE } from "@/lib/digilocker"
-import { matchSchemes } from "@/lib/schemes"
+import { filterSchemesByCoverage, getAllSchemes, matchSchemes } from "@/lib/schemes"
+import { t } from "@/data/translations"
+
+const MATCH_QUERY = "Handloom Weaver"
 
 export default function Page() {
   const { prefs, hydrated, save, update } = usePreferences()
@@ -23,9 +30,10 @@ export default function Page() {
   const [textSeed, setTextSeed] = useState(undefined)
   const [compact, setCompact] = useState(false)
   const [activeMetric, setActiveMetric] = useState(null)
+  const [activeTab, setActiveTab] = useState("voice")
+  const [assistantOpen, setAssistantOpen] = useState(false)
   const searchTimer = useRef(null)
 
-  // Sync local mode with saved preference once known.
   const initialisedMode = useRef(false)
   if (prefs && !initialisedMode.current) {
     initialisedMode.current = true
@@ -33,12 +41,18 @@ export default function Page() {
   }
 
   const runSearch = useCallback(
-    (q) => {
+    (q, options = {}) => {
+      const instant = Boolean(options.instant)
       setQuery(q)
-      setPhase("loading")
       setActiveMetric(null)
       update({ lastSearch: q })
       if (searchTimer.current) clearTimeout(searchTimer.current)
+      if (instant) {
+        setResults(matchSchemes(q).slice(0, 3))
+        setPhase("results")
+        return
+      }
+      setPhase("loading")
       searchTimer.current = setTimeout(() => {
         setResults(matchSchemes(q))
         setPhase("results")
@@ -59,6 +73,7 @@ export default function Page() {
     setResults([])
     setTextSeed(undefined)
     setActiveMetric(null)
+    setActiveTab("voice")
   }
 
   function switchToText(seed) {
@@ -72,10 +87,44 @@ export default function Page() {
     setTextSeed(DIGILOCKER_DEMO_PROFILE.trade)
   }
 
+  function handleTabChange(tabId) {
+    setActiveTab(tabId)
+    if (tabId === "voice") {
+      setMode("voice")
+      setPhase("input")
+    }
+    if (tabId === "matches" && results.length === 0) {
+      runSearch(MATCH_QUERY, { instant: true })
+    }
+  }
+
+  function handleCoverageSelect(key) {
+    setActiveMetric((prev) => (prev === key ? null : key))
+    setActiveTab("matches")
+  }
+
+  function viewAssistantSchemes() {
+    setAssistantOpen(false)
+    setActiveTab("matches")
+    runSearch(ASSISTANT_QUERY, { instant: true })
+  }
+
   const language = prefs?.language ?? "hi"
+  const coverageLabels = {
+    central: t(language, "centralSchemes"),
+    state: t(language, "stateSchemes"),
+    artisans: t(language, "craftWeaver"),
+    credit: t(language, "creditSubsidy"),
+  }
+  const matchResults = activeMetric
+    ? filterSchemesByCoverage(getAllSchemes(), activeMetric)
+    : results.length
+      ? results
+      : matchSchemes(MATCH_QUERY).slice(0, 3)
+  const matchQuery = activeMetric ? coverageLabels[activeMetric] : query || MATCH_QUERY
 
   return (
-    <div className="artisan-backdrop relative min-h-dvh">
+    <div id="top" className="artisan-backdrop relative min-h-dvh">
       {hydrated && !prefs && (
         <OnboardingCard
           onComplete={(p) => {
@@ -93,101 +142,159 @@ export default function Page() {
         onSearchFocus={() => {
           setMode("text")
           setPhase("input")
+          setActiveTab("voice")
         }}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
       />
 
       <main className="relative mx-auto max-w-3xl px-4 pb-16 md:px-6">
-        {phase === "input" && !compact && (
-          <section className="pt-8 text-center md:pt-12">
-            <h1 className="text-balance text-2xl font-extrabold tracking-[0.16em] text-[#0b3d6e] md:text-4xl">
-              NYAYASETU
-            </h1>
-            <p className="mx-auto mt-3 max-w-xl text-pretty text-sm text-muted-foreground md:text-base">
-              National Scheme Matching Portal for Marginalized Entrepreneurs
-            </p>
-          </section>
+        {activeTab === "voice" && (
+          <>
+            {phase === "input" && !compact && (
+              <section className="pt-8 text-center md:pt-12">
+                <h1 className="text-balance text-2xl font-extrabold tracking-[0.16em] text-[#0b3d6e] md:text-4xl">
+                  NYAYASETU
+                </h1>
+                <p className="mx-auto mt-3 max-w-xl text-pretty text-lg font-semibold text-foreground md:text-xl">
+                  {t(language, "heroHeadline")}
+                </p>
+                <p className="mx-auto mt-2 max-w-xl text-pretty text-sm text-muted-foreground md:text-base">
+                  {t(language, "heroSubtitle")}
+                </p>
+              </section>
+            )}
+
+            {phase === "input" && prefs && (
+              <div className="mt-6">
+                <ProfileStrip
+                  profile={prefs}
+                  language={language}
+                  onDigiLocker={(e) => {
+                    e.stopPropagation()
+                    applyDigiLocker()
+                  }}
+                />
+              </div>
+            )}
+
+            {compact && <CompactBanner language={language} />}
+
+            <div className="mt-4">
+              {phase === "input" ? (
+                mode === "voice" ? (
+                  <VoiceScreen
+                    language={language}
+                    onConfirm={(t) => {
+                      runSearch(t)
+                      setActiveTab("matches")
+                    }}
+                    onSwitchToText={(seed) => switchToText(seed)}
+                  />
+                ) : (
+                  <TextScreen
+                    language={language}
+                    seed={textSeed}
+                    onSearch={(q) => {
+                      runSearch(q)
+                      setActiveTab("matches")
+                    }}
+                    onSwitchToVoice={() => setMode("voice")}
+                  />
+                )
+              ) : (
+                <div className="pt-4">
+                  <button
+                    type="button"
+                    onClick={newSearch}
+                    className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <ArrowLeft className="size-4" aria-hidden />
+                    {t(language, "newSearch")}
+                  </button>
+                  <ResultsPreview
+                    loading={phase === "loading"}
+                    query={query}
+                    results={results}
+                    highlightIssuer={highlightIssuer}
+                    language={language}
+                    onChipSelect={(chip) => runSearch(chip)}
+                  />
+                </div>
+              )}
+            </div>
+
+            <section className="mt-8" aria-label={t(language, "schemeCoverage")}>
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-muted-foreground">{t(language, "schemeCoverage")}</h2>
+              </div>
+              <MetricCards
+                compact={compact}
+                activeKey={activeMetric}
+                language={language}
+                onSelect={handleCoverageSelect}
+              />
+            </section>
+
+            {phase === "input" && (
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <Settings2 className="size-3.5" aria-hidden />
+                  {t(language, "defaultInput")}:{" "}
+                  <span className="font-semibold text-foreground">{prefs?.defaultInput ?? mode}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => update({ defaultInput: mode })}
+                  className="rounded-full border border-border px-2.5 py-1 font-medium transition-colors hover:border-primary hover:text-foreground"
+                >
+                  {t(language, "setAsDefault")}
+                </button>
+              </div>
+            )}
+          </>
         )}
 
-        {phase === "input" && prefs && (
-          <div className="mt-6">
-            <ProfileStrip profile={prefs} onDigiLocker={applyDigiLocker} />
-          </div>
-        )}
-
-        {compact && <CompactBanner />}
-
-        {/* Input / Results */}
-        <div className="mt-4">
-          {phase === "input" ? (
-            mode === "voice" ? (
-              <VoiceScreen
-                language={language}
-                onConfirm={(t) => runSearch(t)}
-                onSwitchToText={(seed) => switchToText(seed)}
-              />
-            ) : (
-              <TextScreen
-                language={language}
-                seed={textSeed}
-                onSearch={(q) => runSearch(q)}
-                onSwitchToVoice={() => setMode("voice")}
-              />
-            )
-          ) : (
-            <div className="pt-4">
-              <button
-                type="button"
-                onClick={newSearch}
-                className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <ArrowLeft className="size-4" aria-hidden />
-                New search
-              </button>
+        {activeTab === "matches" && (
+          <div className="pt-6">
+            <h2 className="text-xl font-bold text-[#0b3d6e]">{t(language, "matchesTitle")}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{t(language, "matchesSubtitle")}</p>
+            <div className="mt-4">
               <ResultsPreview
-                loading={phase === "loading"}
-                query={query}
-                results={results}
+                loading={false}
+                query={matchQuery}
+                results={matchResults}
                 highlightIssuer={highlightIssuer}
-                onChipSelect={(chip) => runSearch(chip)}
+                coverageFilter={activeMetric}
+                language={language}
+                onChipSelect={(chip) => runSearch(chip, { instant: true })}
               />
             </div>
-          )}
-        </div>
-
-        {/* Metric cards */}
-        <section className="mt-8" aria-label="Scheme coverage">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-muted-foreground">Scheme coverage</h2>
-            {phase === "results" && activeMetric && (
-              <span className="text-xs text-primary">Filtering results by tap</span>
-            )}
-          </div>
-          <MetricCards
-            compact={compact}
-            activeKey={activeMetric}
-            onSelect={(key) => {
-              setActiveMetric((prev) => (prev === key ? null : key))
-            }}
-          />
-        </section>
-
-        {/* Mode / preference quick switch */}
-        {phase === "input" && (
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <Settings2 className="size-3.5" aria-hidden />
-              Default input: <span className="font-semibold text-foreground">{prefs?.defaultInput ?? mode}</span>
-            </span>
-            <button
-              type="button"
-              onClick={() => update({ defaultInput: mode })}
-              className="rounded-full border border-border px-2.5 py-1 font-medium transition-colors hover:border-primary hover:text-foreground"
-            >
-              Set current as default
-            </button>
+            <section className="mt-8" aria-label={t(language, "schemeCoverage")}>
+              <h3 className="mb-3 text-sm font-semibold text-muted-foreground">{t(language, "schemeCoverage")}</h3>
+              <MetricCards
+                compact={compact}
+                activeKey={activeMetric}
+                language={language}
+                onSelect={handleCoverageSelect}
+              />
+            </section>
           </div>
         )}
+
+        {activeTab === "partners" && <PartnerLocator language={language} />}
+
+        {activeTab === "calculator" && <FinancialCalculator language={language} />}
       </main>
+
+      <Footer />
+
+      <NyayaAssistant
+        open={assistantOpen}
+        onOpen={() => setAssistantOpen(true)}
+        onClose={() => setAssistantOpen(false)}
+        onViewSchemes={viewAssistantSchemes}
+      />
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react"
 import { Keyboard, Mic, Square } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { t } from "@/data/translations"
 
 const SAMPLE_BY_LANG = {
   hi: "मुझे हैंडलूम बुनाई के लिए सब्सिडी चाहिए",
@@ -38,7 +39,7 @@ export function VoiceScreen({ language, onConfirm, onSwitchToText }) {
     if (!SpeechRecognition) {
       const sample = SAMPLE_BY_LANG[language] || SAMPLE_BY_LANG.en
       setTranscript(sample)
-      setError("Live mic is not available in this browser. A sample query is ready to confirm.")
+      setError(t(language, "micUnavailable"))
       return
     }
 
@@ -52,7 +53,7 @@ export function VoiceScreen({ language, onConfirm, onSwitchToText }) {
       setTranscript(last[0].transcript)
     }
     recognition.onerror = () => {
-      setError("Could not hear clearly. Try again or switch to text.")
+      setError(t(language, "hearError"))
       setListening(false)
     }
     recognition.onend = () => setListening(false)
@@ -66,7 +67,7 @@ export function VoiceScreen({ language, onConfirm, onSwitchToText }) {
 
   return (
     <section className="rounded-xl border border-border bg-card p-5 md:p-6">
-      <p className="text-center text-sm text-muted-foreground">Speak your craft, location, or need</p>
+      <p className="text-center text-sm text-muted-foreground">{t(language, "speakCraft")}</p>
 
       <div className="mt-5 flex flex-col items-center">
         <div className="relative flex size-24 items-center justify-center">
@@ -83,21 +84,25 @@ export function VoiceScreen({ language, onConfirm, onSwitchToText }) {
               listening ? "bg-primary text-primary-foreground" : "bg-surface text-primary shadow-sm"
             }`}
             aria-pressed={listening}
-            aria-label={listening ? "Stop recording" : "Start voice query"}
+            aria-label={listening ? t(language, "listening") : t(language, "useVoice")}
           >
             {listening ? <Square className="size-6" /> : <Mic className="size-8" />}
           </button>
         </div>
         <p className="mt-3 text-xs font-medium text-foreground">
-          {listening ? "Listening…" : "Use Voice"}
+          {listening ? t(language, "listening") : t(language, "useVoice")}
         </p>
         <p className="mt-1 max-w-xs text-center text-[11px] leading-snug text-muted-foreground">
-          Speak in your native language (Hindi, Tamil, Bengali, Telugu)
+          {t(language, "voiceCaption")}
         </p>
       </div>
 
       <p className="mt-4 min-h-12 rounded-lg bg-surface px-3 py-3 text-center text-sm">
-        {transcript || <span className="text-muted-foreground">Example: {sample}</span>}
+        {transcript || (
+          <span className="text-muted-foreground">
+            {t(language, "example")}: {sample}
+          </span>
+        )}
       </p>
       {error && <p className="mt-2 text-center text-xs text-primary">{error}</p>}
 
@@ -107,11 +112,11 @@ export function VoiceScreen({ language, onConfirm, onSwitchToText }) {
           disabled={!transcript.trim()}
           onClick={() => onConfirm(transcript.trim())}
         >
-          Find schemes
+          {t(language, "findSchemes")}
         </Button>
         <Button variant="outline" className="flex-1" onClick={() => onSwitchToText(transcript || undefined)}>
           <Keyboard className="size-4" />
-          Type instead
+          {t(language, "typeInstead")}
         </Button>
       </div>
     </section>

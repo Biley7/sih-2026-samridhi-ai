@@ -1,8 +1,18 @@
 import { Search, Wifi, WifiOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LANGUAGES } from "@/lib/languages"
+import { USP_TABS } from "@/lib/usp-tabs"
+import { t } from "@/data/translations"
 
-export function SiteHeader({ language, onLanguageChange, compact, onToggleCompact, onSearchFocus }) {
+export function SiteHeader({
+  language,
+  onLanguageChange,
+  compact,
+  onToggleCompact,
+  onSearchFocus,
+  activeTab,
+  onTabChange,
+}) {
   return (
     <header className="sticky top-0 z-20 shadow-sm">
       <div className="flex h-1.5">
@@ -58,7 +68,7 @@ export function SiteHeader({ language, onLanguageChange, compact, onToggleCompac
             </p>
           </div>
 
-          <Button variant="outline" size="icon" onClick={onSearchFocus} aria-label="Search by text">
+          <Button variant="outline" size="icon" onClick={onSearchFocus} aria-label={t(language, "searchByText")}>
             <Search className="size-4" />
           </Button>
 
@@ -69,9 +79,38 @@ export function SiteHeader({ language, onLanguageChange, compact, onToggleCompac
             aria-pressed={compact}
           >
             {compact ? <WifiOff className="size-3.5" /> : <Wifi className="size-3.5" />}
-            <span className="hidden sm:inline">{compact ? "Low data" : "Full"}</span>
+            <span className="hidden sm:inline">{compact ? t(language, "lowData") : t(language, "full")}</span>
           </Button>
         </div>
+
+        <nav className="border-t border-slate-200" aria-label={t(language, "schemeCoverage")}>
+          <div className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-2 py-1.5 md:px-6">
+            {USP_TABS.map((tab) => {
+              const active = activeTab === tab.id
+              const labels = {
+                voice: t(language, "tabVoice"),
+                matches: t(language, "tabMatches"),
+                partners: t(language, "tabPartners"),
+                calculator: t(language, "tabCalculator"),
+              }
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => onTabChange(tab.id)}
+                  className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold transition-colors md:text-sm ${
+                    active
+                      ? "bg-[#0b3d6e] text-white"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-[#0b3d6e]"
+                  }`}
+                  aria-current={active ? "page" : undefined}
+                >
+                  {labels[tab.id] || tab.label}
+                </button>
+              )
+            })}
+          </div>
+        </nav>
       </div>
     </header>
   )

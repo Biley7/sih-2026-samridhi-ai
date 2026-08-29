@@ -3,6 +3,7 @@ import { Keyboard, Mic, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DIGILOCKER_DEMO_PROFILE } from "@/lib/digilocker"
 import { LANGUAGES } from "@/lib/languages"
+import { t } from "@/data/translations"
 
 export function OnboardingCard({ onComplete }) {
   const [language, setLanguage] = useState("hi")
@@ -38,25 +39,32 @@ export function OnboardingCard({ onComplete }) {
         onSubmit={handleSubmit}
         className="my-4 w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg"
       >
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">Welcome</p>
-        <h2 className="mt-1 text-xl font-bold">Set up NYAYASETU in one step</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Choose a language, link your documents, and how you prefer to ask for schemes.
-        </p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t(language, "welcome")}</p>
+        <h2 className="mt-1 text-xl font-bold">{t(language, "onboardingTitle")}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{t(language, "onboardingBody")}</p>
 
-        <Button type="button" variant="digilocker" className="mt-5 w-full" onClick={fillDigiLocker}>
+        <Button
+          type="button"
+          variant="digilocker"
+          className="mt-5 w-full"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            fillDigiLocker()
+          }}
+        >
           <ShieldCheck className="size-4" />
-          Auto-fill with DigiLocker
+          {t(language, "autoFillDigiLocker")}
         </Button>
         {digiLockerLinked && (
           <p className="mt-2 text-center text-xs font-medium text-emerald-700">
-            Documents fetched from DigiLocker (demo)
+            {t(language, "digiLockerFetched")}
           </p>
         )}
 
         <div className="mt-4 grid gap-3">
           <label className="block text-sm font-medium">
-            Name
+            {t(language, "name")}
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -65,7 +73,7 @@ export function OnboardingCard({ onComplete }) {
             />
           </label>
           <label className="block text-sm font-medium">
-            Trade
+            {t(language, "trade")}
             <input
               value={trade}
               onChange={(e) => setTrade(e.target.value)}
@@ -74,7 +82,7 @@ export function OnboardingCard({ onComplete }) {
             />
           </label>
           <label className="block text-sm font-medium">
-            Annual income
+            {t(language, "income")}
             <input
               value={income}
               onChange={(e) => setIncome(e.target.value)}
@@ -85,7 +93,7 @@ export function OnboardingCard({ onComplete }) {
         </div>
 
         <label className="mt-4 block text-sm font-medium">
-          Language
+          {t(language, "language")}
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
@@ -99,7 +107,7 @@ export function OnboardingCard({ onComplete }) {
           </select>
         </label>
 
-        <p className="mt-4 text-sm font-medium">Default input</p>
+        <p className="mt-4 text-sm font-medium">{t(language, "defaultInputLabel")}</p>
         <div className="mt-2 grid grid-cols-2 gap-2">
           <button
             type="button"
@@ -111,7 +119,7 @@ export function OnboardingCard({ onComplete }) {
             }`}
           >
             <Mic className="mb-1 size-4 text-primary" />
-            Voice
+            {t(language, "voice")}
           </button>
           <button
             type="button"
@@ -123,12 +131,12 @@ export function OnboardingCard({ onComplete }) {
             }`}
           >
             <Keyboard className="mb-1 size-4 text-primary" />
-            Text
+            {t(language, "text")}
           </button>
         </div>
 
         <Button type="submit" className="mt-6 w-full">
-          Continue
+          {t(language, "continue")}
         </Button>
       </form>
     </div>

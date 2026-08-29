@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Mic, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { getSuggestionChips } from "@/lib/schemes"
+import { t } from "@/data/translations"
 
 export function TextScreen({ language, seed, onSearch, onSwitchToVoice }) {
   const [query, setQuery] = useState(seed || "")
@@ -20,24 +21,20 @@ export function TextScreen({ language, seed, onSearch, onSwitchToVoice }) {
     <section className="rounded-xl border border-border bg-card p-5 md:p-6">
       <form onSubmit={handleSubmit}>
         <label htmlFor="scheme-query" className="text-sm font-medium">
-          Describe your craft or need
+          {t(language, "describeNeed")}
         </label>
         <textarea
           id="scheme-query"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           rows={3}
-          placeholder={
-            language === "hi"
-              ? "उदाहरण: हैंडलूम, कच्ची सामग्री, या मुद्रा लोन"
-              : "e.g. handloom weaver looking for working capital"
-          }
+          placeholder={t(language, "textPlaceholder")}
           className="mt-2 w-full resize-none rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none ring-ring focus:ring-2"
         />
         <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start">
           <Button type="submit" className="flex-1" disabled={!query.trim()}>
             <Search className="size-4" />
-            Search schemes
+            {t(language, "searchSchemes")}
           </Button>
           <div className="flex flex-1 flex-col items-center">
             <div className="relative w-full">
@@ -49,11 +46,11 @@ export function TextScreen({ language, seed, onSearch, onSwitchToVoice }) {
                 onClick={onSwitchToVoice}
               >
                 <Mic className="size-4" />
-                Use Voice
+                {t(language, "useVoice")}
               </Button>
             </div>
             <p className="mt-1.5 text-center text-[11px] leading-snug text-muted-foreground">
-              Speak in your native language (Hindi, Tamil, Bengali, Telugu)
+              {t(language, "voiceCaption")}
             </p>
           </div>
         </div>

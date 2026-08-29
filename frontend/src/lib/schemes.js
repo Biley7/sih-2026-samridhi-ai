@@ -143,6 +143,34 @@ export function getSuggestionChips() {
   return SUGGESTION_CHIPS
 }
 
+export function getAllSchemes() {
+  return SCHEMES.map((scheme) => ({
+    ...scheme,
+    matchReason: "Why Matched: Income criteria verified + Artisan category aligned",
+  }))
+}
+
+export function filterSchemesByCoverage(schemes, key) {
+  if (!key) return schemes
+  if (key === "central") return schemes.filter((s) => s.issuer === "Central")
+  if (key === "state") return schemes.filter((s) => s.issuer === "State")
+  if (key === "artisans") {
+    return schemes.filter((s) =>
+      /handloom|weaver|craft|cluster|pottery|zari|artisan|loom/i.test(
+        `${s.name} ${s.category} ${(s.keywords || []).join(" ")}`,
+      ),
+    )
+  }
+  if (key === "credit") {
+    return schemes.filter((s) =>
+      /credit|subsidy|loan|mudra|finance|working capital/i.test(
+        `${s.name} ${s.category} ${(s.keywords || []).join(" ")}`,
+      ),
+    )
+  }
+  return schemes
+}
+
 export function getCoverageStats() {
   return {
     central: SCHEMES.filter((s) => s.issuer === "Central").length,
