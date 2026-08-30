@@ -8,6 +8,7 @@ const DEFAULT_PREFS = {
   lastSearch: "",
   name: "",
   trade: "",
+  category: "General",
   income: "",
   digiLockerLinked: false,
 }

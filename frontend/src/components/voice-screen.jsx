@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Keyboard, Mic, Square } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { t } from "@/data/translations"
@@ -12,55 +12,27 @@ const SAMPLE_BY_LANG = {
   mr: "हँडलूम विणकामासाठी अनुदान हवे",
 }
 
-const LOCALE = {
-  hi: "hi-IN",
-  en: "en-IN",
-  bn: "bn-IN",
-  ta: "ta-IN",
-  te: "te-IN",
-  mr: "mr-IN",
-}
-
 export function VoiceScreen({ language, onConfirm, onSwitchToText }) {
-  const [listening, setListening] = useState(false)
+  const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState("")
   const [error, setError] = useState("")
-  const recognitionRef = useRef(null)
+  const onConfirmRef = useRef(onConfirm)
+  onConfirmRef.current = onConfirm
 
-  function stopListening() {
-    recognitionRef.current?.stop?.()
-    recognitionRef.current = null
-    setListening(false)
-  }
+  useEffect(() => {
+    if (!isListening) return undefined
+    const timer = window.setTimeout(() => {
+      const voiceQuery = "Main handloom weaver hoon, mujhe subsidy chahiye."
+      setTranscript(voiceQuery)
+      setIsListening(false)
+      onConfirmRef.current(voiceQuery)
+    }, 3000)
+    return () => window.clearTimeout(timer)
+  }, [isListening])
 
   function startListening() {
     setError("")
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SpeechRecognition) {
-      const sample = SAMPLE_BY_LANG[language] || SAMPLE_BY_LANG.en
-      setTranscript(sample)
-      setError(t(language, "micUnavailable"))
-      return
-    }
-
-    const recognition = new SpeechRecognition()
-    recognition.lang = LOCALE[language] || "en-IN"
-    recognition.interimResults = true
-    recognition.continuous = false
-
-    recognition.onresult = (event) => {
-      const last = event.results[event.results.length - 1]
-      setTranscript(last[0].transcript)
-    }
-    recognition.onerror = () => {
-      setError(t(language, "hearError"))
-      setListening(false)
-    }
-    recognition.onend = () => setListening(false)
-
-    recognitionRef.current = recognition
-    setListening(true)
-    recognition.start()
+    setIsListening(true)
   }
 
   const sample = SAMPLE_BY_LANG[language] || SAMPLE_BY_LANG.en
@@ -71,7 +43,7 @@ export function VoiceScreen({ language, onConfirm, onSwitchToText }) {
 
       <div className="mt-5 flex flex-col items-center">
         <div className="relative flex size-24 items-center justify-center">
-          {!listening && (
+          {!isListening && (
             <>
               <span className="absolute size-20 rounded-full bg-primary/25 animate-pulse-ring" />
               <span className="absolute size-20 rounded-full bg-primary/20 animate-pulse-ring [animation-delay:400ms]" />
@@ -79,18 +51,18 @@ export function VoiceScreen({ language, onConfirm, onSwitchToText }) {
           )}
           <button
             type="button"
-            onClick={listening ? stopListening : startListening}
+            onClick={() => setIsListening((current) => !current)}
             className={`relative z-10 flex size-20 items-center justify-center rounded-full transition-colors ${
-              listening ? "bg-primary text-primary-foreground" : "bg-surface text-primary shadow-sm"
+              isListening ? "animate-pulse bg-red-600 text-white" : "bg-surface text-primary shadow-sm"
             }`}
-            aria-pressed={listening}
-            aria-label={listening ? t(language, "listening") : t(language, "useVoice")}
+            aria-pressed={isListening}
+            aria-label={isListening ? t(language, "listening") : t(language, "useVoice")}
           >
-            {listening ? <Square className="size-6" /> : <Mic className="size-8" />}
+            {isListening ? <Square className="size-6" /> : <Mic className="size-8" />}
           </button>
         </div>
         <p className="mt-3 text-xs font-medium text-foreground">
-          {listening ? t(language, "listening") : t(language, "useVoice")}
+          {isListening ? t(language, "listening") : t(language, "useVoice")}
         </p>
         <p className="mt-1 max-w-xs text-center text-[11px] leading-snug text-muted-foreground">
           {t(language, "voiceCaption")}

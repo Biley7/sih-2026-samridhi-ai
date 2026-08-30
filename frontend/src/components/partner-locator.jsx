@@ -8,6 +8,7 @@ const PARTNERS = [
     type: "SCA",
     district: "Kolkata",
     state: "West Bengal",
+    location: "Kolkata, West Bengal",
     km: 1.2,
     activeFundStatus: true,
     npaRating: "LOW",
@@ -18,6 +19,7 @@ const PARTNERS = [
     type: "PSB",
     district: "Kolkata",
     state: "West Bengal",
+    location: "Kolkata, West Bengal",
     km: 1.8,
     activeFundStatus: true,
     npaRating: "LOW",
@@ -28,6 +30,7 @@ const PARTNERS = [
     type: "PSB",
     district: "Kolkata",
     state: "West Bengal",
+    location: "Kolkata, West Bengal",
     km: 2.4,
     activeFundStatus: true,
     npaRating: "LOW",
@@ -38,6 +41,7 @@ const PARTNERS = [
     type: "RRB",
     district: "North 24 Parganas",
     state: "West Bengal",
+    location: "North 24 Parganas, West Bengal",
     km: 8.6,
     activeFundStatus: true,
     npaRating: "MEDIUM",
@@ -69,32 +73,33 @@ export function PartnerLocator({ language = "en" }) {
         </div>
 
         <ul className="divide-y divide-border">
-          {PARTNERS.map((p) => (
-            <li key={p.id} className="flex items-start gap-3 p-4">
+          {PARTNERS.map((partner) => (
+            <li key={partner.id} className="flex items-start gap-3 p-4">
               <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface text-[#0b3d6e]">
                 <Building2 className="size-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold">{p.name}</p>
+                <p className="text-sm font-semibold">{partner.name}</p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  {p.type} · {p.district}, {p.state}
+                  {partner.type} · {partner.district}, {partner.state}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px]">{p.km} km</span>
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px]">{partner.km} km</span>
                   <span
                     className={`rounded-full px-2 py-0.5 text-[11px] ${
-                      p.activeFundStatus ? "bg-emerald-50 text-emerald-800" : "bg-rose-50 text-rose-800"
+                      partner.activeFundStatus ? "bg-emerald-50 text-emerald-800" : "bg-rose-50 text-rose-800"
                     }`}
                   >
-                    {p.activeFundStatus ? t(language, "fundsActive") : t(language, "fundsPaused")}
+                    {partner.activeFundStatus ? t(language, "fundsActive") : t(language, "fundsPaused")}
                   </span>
                   <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[11px] text-sky-800">
-                    NPA {p.npaRating}
+                    NPA {partner.npaRating}
                   </span>
                 </div>
               </div>
               <button
                 type="button"
+                onClick={() => window.open("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(partner.name + " " + partner.location), "_blank")}
                 className="inline-flex items-center gap-1 rounded-lg border border-border px-2 py-1 text-[11px] font-medium hover:border-primary"
               >
                 <Navigation className="size-3" />

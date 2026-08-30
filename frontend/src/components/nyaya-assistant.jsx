@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Bot, Sparkles, Volume2, X } from "lucide-react"
+import { Bot, Mic, Sparkles, Volume2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { t } from "@/data/translations"
 
@@ -7,16 +7,51 @@ const USER_REPLY = "I am a handloom weaver looking for subsidies."
 export const ASSISTANT_QUERY = USER_REPLY
 
 export function NyayaAssistant({ open, onOpen, onClose, onViewSchemes, language = "en" }) {
-  const [step, setStep] = useState(1)
+  const [chatHistory, setChatHistory] = useState([
+    { sender: "ai", text: "Namaste! I am NyayaAssistant. How can I help your business today?" },
+  ])
+  const [query, setQuery] = useState("")
+  const [isListening, setIsListening] = useState(false)
+
+  const responseText = "I found 3 eligible MoSJE schemes for handloom weavers with up to 5% interest subvention. Click 'Scheme Matches' to view."
 
   useEffect(() => {
-    if (open) setStep(1)
+    if (open) {
+      setChatHistory([{ sender: "ai", text: "Namaste! I am NyayaAssistant. How can I help your business today?" }])
+      setQuery("")
+    }
   }, [open])
 
-  function handleUserReply(e) {
+  useEffect(() => {
+    if (!isListening) return undefined
+    const timer = window.setTimeout(() => {
+      setQuery("I am a handloom weaver looking for subsidies.")
+      setIsListening(false)
+      appendConversation("I am a handloom weaver looking for subsidies.")
+    }, 3000)
+    return () => window.clearTimeout(timer)
+  }, [isListening])
+
+  function handleSubmit(e) {
+    e.preventDefault()
     e.stopPropagation()
-    setStep(2)
-    window.setTimeout(() => setStep(3), 450)
+    const message = query.trim()
+    if (!message) return
+    appendConversation(message)
+    setQuery("")
+  }
+
+  function appendConversation(message) {
+    setChatHistory((history) => [...history, { sender: "user", text: message }])
+    window.setTimeout(() => {
+      setChatHistory((history) => [
+        ...history,
+        {
+          sender: "ai",
+          text: responseText,
+        },
+      ])
+    }, 1000)
   }
 
   return (
@@ -76,38 +111,36 @@ export function NyayaAssistant({ open, onOpen, onClose, onViewSchemes, language 
             </div>
 
             <div className="space-y-3 bg-slate-50 p-4">
-              <div className="mr-8 rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm">
-                <p className="text-[10px] font-medium uppercase tracking-wide text-[#0b3d6e]">NyayaAssistant</p>
-                <p className="mt-1">{t(language, "assistantGreeting")}</p>
-              </div>
-
-              {step === 1 && (
-                <button
-                  type="button"
-                  onClick={handleUserReply}
-                  className="ml-8 w-[calc(100%-2rem)] rounded-2xl rounded-tr-sm border border-[#0b3d6e] bg-white px-3.5 py-2.5 text-left text-sm text-[#0b3d6e] shadow-sm hover:bg-sky-50"
-                >
-                  <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">{t(language, "tapToReply")}</p>
-                  <p className="mt-1">{t(language, "assistantUserReply")}</p>
-                </button>
-              )}
-
-              {step >= 2 && (
-                <div className="ml-8 rounded-2xl rounded-tr-sm bg-[#0b3d6e] px-3.5 py-2.5 text-sm text-white shadow-sm">
-                  <p className="text-[10px] font-medium uppercase tracking-wide text-sky-200">{t(language, "youLabel")}</p>
-                  <p className="mt-1">{t(language, "assistantUserReply")}</p>
+              {chatHistory.map((message, index) => (
+                <div key={`${message.sender}-${index}`} className={message.sender === "user" ? "ml-8 rounded-2xl rounded-tr-sm bg-[#0b3d6e] px-3.5 py-2.5 text-sm text-white shadow-sm" : "mr-8 rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm"}>
+                  <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">{message.sender === "user" ? t(language, "youLabel") : "NyayaAssistant"}</p>
+                  <p className="mt-1">{message.text}</p>
                 </div>
-              )}
-
-              {step >= 3 && (
-                <div className="mr-8 rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm">
-                  <p className="text-[10px] font-medium uppercase tracking-wide text-[#0b3d6e]">NyayaAssistant</p>
-                  <p className="mt-1">{t(language, "assistantFound")}</p>
-                </div>
-              )}
+              ))}
             </div>
 
-            {step >= 3 && (
+            <form
+              className="flex items-center gap-2 border-t border-slate-200 bg-white p-3"
+              onSubmit={handleSubmit}
+            >
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={isListening ? "Listening in native language..." : "Ask NyayaAssistant..."}
+                className="h-10 min-w-0 flex-1 rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-[#0b3d6e]"
+                aria-label="Ask NyayaAssistant"
+              />
+              <button
+                type="button"
+                onClick={() => setIsListening((current) => !current)}
+                className={`flex size-10 shrink-0 items-center justify-center rounded-lg text-white transition ${isListening ? "animate-pulse bg-red-600" : "bg-red-500 hover:bg-red-600"}`}
+                aria-label={isListening ? "Stop listening" : "Start voice input"}
+              >
+                <Mic className="size-4" />
+              </button>
+            </form>
+
+            {chatHistory.some((message) => message.sender === "ai" && message.text.startsWith("Based on MoSJE")) && (
               <div className="border-t border-slate-200 bg-white p-4">
                 <Button
                   className="w-full"

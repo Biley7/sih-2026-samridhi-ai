@@ -7,19 +7,16 @@ const QUICK_LINKS = [
   { id: "contact", label: "Contact Us" },
   { id: "screen-reader", label: "Screen Reader" },
   { id: "accessibility", label: "Accessibility Statement" },
-  { id: "faq", label: "Frequently Asked Questions" },
+  { id: "faq", label: "FAQs" },
   { id: "disclaimer", label: "Disclaimer" },
   { id: "terms", label: "Terms & Conditions" },
   { id: "dashboard", label: "Scheme Dashboard" },
 ]
 
 const PORTALS = [
-  { name: "Digital India", href: "https://www.digitalindia.gov.in" },
-  { name: "DigiLocker", href: "https://www.digilocker.gov.in" },
-  { name: "UMANG", href: "https://web.umang.gov.in" },
-  { name: "india.gov.in", href: "https://www.india.gov.in" },
-  { name: "myGov", href: "https://www.mygov.in" },
-  { name: "data.gov.in", href: "https://data.gov.in" },
+  { name: "Digital India", href: "https://www.digitalindia.gov.in", logo: "/digital-india.png" },
+  { name: "DigiLocker", href: "https://www.digilocker.gov.in", logo: "/digilocker.png" },
+  { name: "UMANG", href: "https://web.umang.gov.in", logo: "/umang.png" },
 ]
 
 const FAQS = [
@@ -168,16 +165,16 @@ export function Footer() {
 
         <div>
           <h2 className="text-sm font-semibold text-white">Useful Links</h2>
-          <div className="mt-4 grid grid-cols-3 gap-2">
+          <div className="mt-4 grid grid-cols-2 gap-2">
             {PORTALS.map((portal) => (
               <a
                 key={portal.name}
                 href={portal.href}
                 target="_blank"
                 rel="noreferrer"
-                className="flex min-h-[3.25rem] items-center justify-center rounded-md bg-white px-1.5 text-center text-[10px] font-semibold leading-tight text-slate-800 shadow-sm hover:bg-slate-100"
+                className="flex min-h-[3.25rem] items-center justify-center rounded-md bg-white px-2 py-2 text-center text-[10px] font-semibold leading-tight text-slate-800 shadow-sm hover:bg-slate-100"
               >
-                {portal.name}
+                <img src={portal.logo} alt={portal.name} className="h-8 object-contain" />
               </a>
             ))}
           </div>

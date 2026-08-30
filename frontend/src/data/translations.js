@@ -66,7 +66,7 @@ const en = {
   you: "You",
   fundsActive: "Funds active",
   fundsPaused: "Funds paused",
-  route: "Route",
+  route: "Navigate via Google Maps",
   calculatorTitle: "Financial Calculator",
   calculatorSubtitle: "Estimate EMI, interest, and moratorium for concessional MoSJE / NSFDC loans.",
   loanAmount: "Loan amount (₹)",

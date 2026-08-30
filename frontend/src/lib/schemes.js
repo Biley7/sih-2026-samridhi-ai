@@ -7,6 +7,7 @@ const SCHEMES = [
     description:
       "Margin-money subsidy for new micro-enterprises in manufacturing and services, including handicrafts and handloom units.",
     benefit: "Up to 35% subsidy on project cost",
+    applyUrl: "https://socialjustice.gov.in/",
     keywords: ["pmegp", "subsidy", "micro", "enterprise", "artisan", "weaving", "craft"],
   },
   {
@@ -17,6 +18,7 @@ const SCHEMES = [
     description:
       "Collateral-light loans (Shishu, Kishore, Tarun) for weavers, artisans, and small traders to buy raw material and tools.",
     benefit: "Loans up to ₹20 lakh",
+    applyUrl: "https://socialjustice.gov.in/",
     keywords: ["mudra", "loan", "kishore", "shishu", "working capital", "trader"],
   },
   {
@@ -27,6 +29,7 @@ const SCHEMES = [
     description:
       "Support for weaver clusters, yarn depots, work-sheds, and marketing of handloom products.",
     benefit: "Cluster grants and yarn access",
+    applyUrl: "https://texmin.nic.in/",
     keywords: ["handloom", "weaver", "yarn", "loom", "cluster"],
   },
   {
@@ -37,6 +40,7 @@ const SCHEMES = [
     description:
       "Common facility centres, design, and market linkages for traditional crafts such as pottery, brass, and textiles.",
     benefit: "Cluster infrastructure support",
+    applyUrl: "https://socialjustice.gov.in/",
     keywords: ["sfurti", "cluster", "craft", "traditional", "pottery", "brass"],
   },
   {
@@ -47,6 +51,7 @@ const SCHEMES = [
     description:
       "Small concessional loans for SC entrepreneurs setting up micro-enterprises and household production units.",
     benefit: "Interest from 6.5%",
+    applyUrl: "https://nsfdc.nic.in/",
     keywords: ["nsfdc", "sc", "micro", "credit", "scheduled"],
   },
   {
@@ -57,6 +62,7 @@ const SCHEMES = [
     description:
       "Medium- to long-term finance for commercial, agricultural, and industrial units up to ₹50 lakh.",
     benefit: "Up to ₹50 lakh",
+    applyUrl: "https://nsfdc.nic.in/",
     keywords: ["nsfdc", "term", "loan", "enterprise", "industrial"],
   },
   {
@@ -67,6 +73,7 @@ const SCHEMES = [
     description:
       "State top-up for tassar, jute, and handloom units on looms, dyeing, and market stalls.",
     benefit: "State capital subsidy",
+    applyUrl: "https://texmin.nic.in/",
     keywords: ["west bengal", "tassar", "jute", "handloom", "bengal", "state"],
   },
   {
@@ -77,6 +84,7 @@ const SCHEMES = [
     description:
       "Easy working-capital credit for gem, blue pottery, and block-print artisans registered with the state.",
     benefit: "Low-interest artisan credit",
+    applyUrl: "https://socialjustice.gov.in/",
     keywords: ["rajasthan", "pottery", "block print", "gem", "artisan card"],
   },
   {
@@ -87,6 +95,7 @@ const SCHEMES = [
     description:
       "Loom modernisation, yarn passbook, and welfare cover for cooperative and independent weavers.",
     benefit: "Loom subsidy + welfare",
+    applyUrl: "https://texmin.nic.in/",
     keywords: ["tamil nadu", "weaver", "loom", "cooperative", "yarn"],
   },
   {
@@ -97,6 +106,7 @@ const SCHEMES = [
     description:
       "Design studios, common stitching units, and GI-linked marketing for Lucknow chikankari and zari units.",
     benefit: "Design & marketing grant",
+    applyUrl: "https://socialjustice.gov.in/",
     keywords: ["uttar pradesh", "chikankari", "zari", "lucknow", "embroidery"],
   },
 ]
@@ -141,6 +151,10 @@ export function matchSchemes(query) {
 
 export function getSuggestionChips() {
   return SUGGESTION_CHIPS
+}
+
+export function getApplicationUrl(scheme) {
+  return scheme.applyUrl || "https://www.myscheme.gov.in/"
 }
 
 export function getAllSchemes() {

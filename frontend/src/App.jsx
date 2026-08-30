@@ -1,7 +1,7 @@
 "use client"
 
-import { useCallback, useMemo, useRef, useState } from "react"
-import { ArrowLeft, Mic, Settings2, WifiOff } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { ArrowLeft, MessageCircle, Mic, Settings2, WifiOff } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { OnboardingCard } from "@/components/onboarding-card"
 import { ProfileStrip } from "@/components/profile-strip"
@@ -14,14 +14,14 @@ import { PartnerLocator } from "@/components/partner-locator"
 import { FinancialCalculator } from "@/components/financial-calculator"
 import { ASSISTANT_QUERY, NyayaAssistant } from "@/components/nyaya-assistant"
 import { usePreferences } from "@/hooks/use-preferences"
-import { DIGILOCKER_DEMO_PROFILE } from "@/lib/digilocker"
 import { filterSchemesByCoverage, getAllSchemes, matchSchemes } from "@/lib/schemes"
 import { t } from "@/data/translations"
 
 const MATCH_QUERY = "Handloom Weaver"
+const heroSlides = Array.from({ length: 15 }, (_, index) => `/hero-${index + 1}.jpeg`)
 
 export default function Page() {
-  const { prefs, hydrated, save, update } = usePreferences()
+  const { prefs, save, update } = usePreferences()
 
   const [mode, setMode] = useState("voice")
   const [phase, setPhase] = useState("input")
@@ -32,7 +32,16 @@ export default function Page() {
   const [activeMetric, setActiveMetric] = useState(null)
   const [activeTab, setActiveTab] = useState("voice")
   const [assistantOpen, setAssistantOpen] = useState(false)
+  const [isProfileSet, setIsProfileSet] = useState(false)
+  const [slideIndex, setSlideIndex] = useState(0)
   const searchTimer = useRef(null)
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setSlideIndex((current) => (current + 1) % heroSlides.length)
+    }, 5000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   const initialisedMode = useRef(false)
   if (prefs && !initialisedMode.current) {
@@ -82,9 +91,17 @@ export default function Page() {
     if (seed) runSearch(seed)
   }
 
-  function applyDigiLocker() {
-    update(DIGILOCKER_DEMO_PROFILE)
-    setTextSeed(DIGILOCKER_DEMO_PROFILE.trade)
+  function completeProfile(profile) {
+    save({
+      ...profile,
+      language: profile.language ?? prefs?.language ?? "hi",
+      defaultInput: profile.defaultInput ?? prefs?.defaultInput ?? "voice",
+      lastSearch: "",
+    })
+    setMode(profile.defaultInput ?? prefs?.defaultInput ?? "voice")
+    setResults(matchSchemes(`${profile.trade} ${profile.category}`))
+    setPhase("results")
+    setIsProfileSet(true)
   }
 
   function handleTabChange(tabId) {
@@ -125,12 +142,10 @@ export default function Page() {
 
   return (
     <div id="top" className="artisan-backdrop relative min-h-dvh">
-      {hydrated && !prefs && (
+      {!isProfileSet && (
         <OnboardingCard
-          onComplete={(p) => {
-            save(p)
-            setMode(p.defaultInput)
-          }}
+          onComplete={completeProfile}
+          onAutoFill={completeProfile}
         />
       )}
 
@@ -152,16 +167,14 @@ export default function Page() {
         {activeTab === "voice" && (
           <>
             {phase === "input" && !compact && (
-              <section className="pt-8 text-center md:pt-12">
-                <h1 className="text-balance text-2xl font-extrabold tracking-[0.16em] text-[#0b3d6e] md:text-4xl">
-                  NYAYASETU
-                </h1>
-                <p className="mx-auto mt-3 max-w-xl text-pretty text-lg font-semibold text-foreground md:text-xl">
-                  {t(language, "heroHeadline")}
-                </p>
-                <p className="mx-auto mt-2 max-w-xl text-pretty text-sm text-muted-foreground md:text-base">
-                  {t(language, "heroSubtitle")}
-                </p>
+              <section
+                className="relative isolate mt-6 overflow-hidden rounded-2xl px-5 py-12 text-center text-white shadow-xl md:mt-8 md:py-16"
+                style={{ backgroundImage: `url(${heroSlides[slideIndex]})`, backgroundPosition: "center", backgroundSize: "cover" }}
+              >
+                <div className="absolute inset-0 -z-10 bg-slate-900/60" />
+                <h1 className="text-balance text-2xl font-extrabold tracking-[0.16em] md:text-4xl">NYAYASETU</h1>
+                <p className="mx-auto mt-3 max-w-xl text-pretty text-lg font-semibold md:text-xl">{t(language, "heroHeadline")}</p>
+                <p className="mx-auto mt-2 max-w-xl text-pretty text-sm text-slate-100 md:text-base">{t(language, "heroSubtitle")}</p>
               </section>
             )}
 
@@ -172,7 +185,7 @@ export default function Page() {
                   language={language}
                   onDigiLocker={(e) => {
                     e.stopPropagation()
-                    applyDigiLocker()
+                    setIsProfileSet(false)
                   }}
                 />
               </div>
@@ -295,6 +308,16 @@ export default function Page() {
         onClose={() => setAssistantOpen(false)}
         onViewSchemes={viewAssistantSchemes}
       />
+
+      <a
+        href="https://wa.me/919876543210?text=Namaste!%20I%20need%20help%20with%20NyayaSetu"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Chat with NyayaSetu on WhatsApp"
+        className="fixed bottom-6 left-6 z-50 flex size-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition hover:scale-105 hover:bg-[#1ebe5d]"
+      >
+        <MessageCircle className="size-7" aria-hidden />
+      </a>
     </div>
   )
 }

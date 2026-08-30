@@ -70,7 +70,12 @@ export function FinancialCalculator({ language = "en" }) {
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">{t(language, "calculatorSubtitle")}</p>
 
-      <form onSubmit={handleSubmit} className="mt-4 grid gap-3 rounded-xl border border-border bg-white p-4 md:grid-cols-2">
+      <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg flex items-center mb-4">
+        <img src="/rbi.png" alt="RBI" className="h-10 object-contain mr-3" />
+        <p>Calculations align with Reserve Bank of India (RBI) Priority Sector Lending guidelines.</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="mt-3 grid gap-3 rounded-xl border border-border bg-white p-4 md:grid-cols-2">
         <label className="text-sm font-medium">
           {t(language, "loanAmount")}
           <input
