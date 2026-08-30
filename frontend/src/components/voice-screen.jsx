@@ -12,12 +12,16 @@ const SAMPLE_BY_LANG = {
   mr: "हँडलूम विणकामासाठी अनुदान हवे",
 }
 
-export function VoiceScreen({ language, onConfirm, onSwitchToText }) {
+export function VoiceScreen({ language, initialQuery = "", onConfirm, onSwitchToText }) {
   const [isListening, setIsListening] = useState(false)
-  const [transcript, setTranscript] = useState("")
+  const [transcript, setTranscript] = useState(initialQuery)
   const [error, setError] = useState("")
   const onConfirmRef = useRef(onConfirm)
   onConfirmRef.current = onConfirm
+
+  useEffect(() => {
+    setTranscript(initialQuery)
+  }, [initialQuery])
 
   useEffect(() => {
     if (!isListening) return undefined

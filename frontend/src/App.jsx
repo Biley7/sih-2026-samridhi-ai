@@ -18,7 +18,7 @@ import { filterSchemesByCoverage, getAllSchemes, matchSchemes } from "@/lib/sche
 import { t } from "@/data/translations"
 
 const MATCH_QUERY = "Handloom Weaver"
-const heroSlides = Array.from({ length: 15 }, (_, index) => `/hero-${index + 1}.jpeg`)
+const heroSlides = Array.from({ length: 15 }, (_, index) => ({ image: `/hero-${index + 1}.jpeg` }))
 
 export default function Page() {
   const { prefs, save, update } = usePreferences()
@@ -33,6 +33,7 @@ export default function Page() {
   const [activeTab, setActiveTab] = useState("voice")
   const [assistantOpen, setAssistantOpen] = useState(false)
   const [isProfileSet, setIsProfileSet] = useState(false)
+  const [profileVoiceQuery, setProfileVoiceQuery] = useState("")
   const [slideIndex, setSlideIndex] = useState(0)
   const searchTimer = useRef(null)
 
@@ -41,6 +42,13 @@ export default function Page() {
       setSlideIndex((current) => (current + 1) % heroSlides.length)
     }, 5000)
     return () => window.clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    heroSlides.forEach((slide) => {
+      const image = new Image()
+      image.src = slide.image
+    })
   }, [])
 
   const initialisedMode = useRef(false)
@@ -99,8 +107,13 @@ export default function Page() {
       lastSearch: "",
     })
     setMode(profile.defaultInput ?? prefs?.defaultInput ?? "voice")
-    setResults(matchSchemes(`${profile.trade} ${profile.category}`))
-    setPhase("results")
+    setProfileVoiceQuery(
+      profile.name === "Sunita Devi"
+        ? "I need a subsidy for my handloom weaving unit"
+        : "I need a concessional loan for my leather craft business",
+    )
+    setActiveTab("voice")
+    setPhase("input")
     setIsProfileSet(true)
   }
 
@@ -169,7 +182,7 @@ export default function Page() {
             {phase === "input" && !compact && (
               <section
                 className="relative isolate mt-6 overflow-hidden rounded-2xl px-5 py-12 text-center text-white shadow-xl md:mt-8 md:py-16"
-                style={{ backgroundImage: `url(${heroSlides[slideIndex]})`, backgroundPosition: "center", backgroundSize: "cover" }}
+                style={{ backgroundImage: `url(${heroSlides[slideIndex].image})`, backgroundPosition: "center", backgroundSize: "cover" }}
               >
                 <div className="absolute inset-0 -z-10 bg-slate-900/60" />
                 <h1 className="text-balance text-2xl font-extrabold tracking-[0.16em] md:text-4xl">NYAYASETU</h1>
@@ -198,6 +211,7 @@ export default function Page() {
                 mode === "voice" ? (
                   <VoiceScreen
                     language={language}
+                    initialQuery={profileVoiceQuery}
                     onConfirm={(t) => {
                       runSearch(t)
                       setActiveTab("matches")

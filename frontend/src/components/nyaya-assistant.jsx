@@ -140,7 +140,7 @@ export function NyayaAssistant({ open, onOpen, onClose, onViewSchemes, language 
               </button>
             </form>
 
-            {chatHistory.some((message) => message.sender === "ai" && message.text.startsWith("Based on MoSJE")) && (
+            {chatHistory.some((message) => message.sender === "ai" && message.text.startsWith("I found 3 eligible MoSJE")) && (
               <div className="border-t border-slate-200 bg-white p-4">
                 <Button
                   className="w-full"
