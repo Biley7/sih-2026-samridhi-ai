@@ -72,7 +72,7 @@ export function ResultsPreview({
             </p>
             <button
               type="button"
-              onClick={() => window.open(scheme.applyUrl, "_blank")}
+              onClick={() => window.open(scheme.applyUrl || "https://socialjustice.gov.in/", "_blank")}
               className="mt-3 inline-flex h-9 items-center rounded-lg bg-[#0b3d6e] px-3 text-xs font-semibold text-white hover:bg-[#0a355f]"
             >
               {t(language, "applyNow")}

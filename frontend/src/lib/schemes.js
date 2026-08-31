@@ -29,7 +29,7 @@ const SCHEMES = [
     description:
       "Support for weaver clusters, yarn depots, work-sheds, and marketing of handloom products.",
     benefit: "Cluster grants and yarn access",
-    applyUrl: "https://texmin.nic.in/",
+    applyUrl: "https://socialjustice.gov.in/",
     keywords: ["handloom", "weaver", "yarn", "loom", "cluster"],
   },
   {
@@ -73,7 +73,7 @@ const SCHEMES = [
     description:
       "State top-up for tassar, jute, and handloom units on looms, dyeing, and market stalls.",
     benefit: "State capital subsidy",
-    applyUrl: "https://texmin.nic.in/",
+    applyUrl: "https://socialjustice.gov.in/",
     keywords: ["west bengal", "tassar", "jute", "handloom", "bengal", "state"],
   },
   {
@@ -95,7 +95,7 @@ const SCHEMES = [
     description:
       "Loom modernisation, yarn passbook, and welfare cover for cooperative and independent weavers.",
     benefit: "Loom subsidy + welfare",
-    applyUrl: "https://texmin.nic.in/",
+    applyUrl: "https://socialjustice.gov.in/",
     keywords: ["tamil nadu", "weaver", "loom", "cooperative", "yarn"],
   },
   {
@@ -154,7 +154,7 @@ export function getSuggestionChips() {
 }
 
 export function getApplicationUrl(scheme) {
-  return scheme.applyUrl || "https://www.myscheme.gov.in/"
+  return scheme.applyUrl || "https://socialjustice.gov.in/"
 }
 
 export function getAllSchemes() {
