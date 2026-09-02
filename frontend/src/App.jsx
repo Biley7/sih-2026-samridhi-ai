@@ -24,6 +24,7 @@ export default function Page() {
   const { prefs, save, update } = usePreferences()
 
   const [mode, setMode] = useState("voice")
+  const [inputMethod, setInputMethod] = useState("voice")
   const [phase, setPhase] = useState("input")
   const [query, setQuery] = useState("")
   const [results, setResults] = useState([])
@@ -55,6 +56,7 @@ export default function Page() {
   if (prefs && !initialisedMode.current) {
     initialisedMode.current = true
     setMode(prefs.defaultInput)
+    setInputMethod(prefs.defaultInput)
   }
 
   const runSearch = useCallback(
@@ -94,9 +96,11 @@ export default function Page() {
   }
 
   function switchToText(seed) {
-    setTextSeed(seed)
+    setInputMethod("text")
     setMode("text")
-    if (seed) runSearch(seed)
+    setTextSeed(seed)
+    setPhase("input")
+    setActiveTab("voice")
   }
 
   function completeProfile(profile) {
@@ -106,7 +110,9 @@ export default function Page() {
       defaultInput: profile.defaultInput ?? prefs?.defaultInput ?? "voice",
       lastSearch: "",
     })
-    setMode(profile.defaultInput ?? prefs?.defaultInput ?? "voice")
+    const nextInputMethod = profile.defaultInput ?? prefs?.defaultInput ?? "voice"
+    setMode(nextInputMethod)
+    setInputMethod(nextInputMethod)
     setProfileVoiceQuery(
       profile.name === "Sunita Devi"
         ? "I need a subsidy for my handloom weaving unit"
@@ -120,7 +126,9 @@ export default function Page() {
   function handleTabChange(tabId) {
     setActiveTab(tabId)
     if (tabId === "voice") {
-      setMode("voice")
+      const nextInputMethod = inputMethod === "text" ? "text" : "voice"
+      setMode(nextInputMethod)
+      setInputMethod(nextInputMethod)
       setPhase("input")
     }
     if (tabId === "matches" && results.length === 0) {
@@ -168,6 +176,7 @@ export default function Page() {
         compact={compact}
         onToggleCompact={() => setCompact((c) => !c)}
         onSearchFocus={() => {
+          setInputMethod("text")
           setMode("text")
           setPhase("input")
           setActiveTab("voice")
@@ -268,11 +277,16 @@ export default function Page() {
                 <span className="inline-flex items-center gap-1.5">
                   <Settings2 className="size-3.5" aria-hidden />
                   {t(language, "defaultInput")}:{" "}
-                  <span className="font-semibold text-foreground">{prefs?.defaultInput ?? mode}</span>
+                  <span className="font-semibold text-foreground">{prefs?.defaultInput ?? inputMethod}</span>
                 </span>
                 <button
                   type="button"
-                  onClick={() => update({ defaultInput: mode })}
+                  onClick={() => {
+                    const selectedInput = inputMethod || mode
+                    setInputMethod(selectedInput)
+                    setMode(selectedInput)
+                    update({ defaultInput: selectedInput })
+                  }}
                   className="rounded-full border border-border px-2.5 py-1 font-medium transition-colors hover:border-primary hover:text-foreground"
                 >
                   {t(language, "setAsDefault")}
@@ -324,13 +338,13 @@ export default function Page() {
       />
 
       <a
-        href="https://wa.me/919876543210?text=Namaste!%20I%20need%20help%20with%20NyayaSetu"
+        href="https://wa.me/911800110031"
         target="_blank"
         rel="noreferrer"
         aria-label="Chat with NyayaSetu on WhatsApp"
-        className="fixed bottom-6 left-6 z-50 flex size-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition hover:scale-105 hover:bg-[#1ebe5d]"
+        className="fixed bottom-6 left-6 z-40 flex size-14 items-center justify-center overflow-hidden rounded-full bg-white shadow-lg ring-2 ring-white transition hover:scale-105"
       >
-        <MessageCircle className="size-7" aria-hidden />
+        <img src="/whatsapp-logo.jpeg" alt="WhatsApp support" className="h-full w-full object-cover" />
       </a>
     </div>
   )

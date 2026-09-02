@@ -58,14 +58,19 @@ export function SiteHeader({
       </div>
 
       <div className="border-b border-border bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3 md:px-6">
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-1 md:px-6 md:py-1.5">
           <div className="min-w-0 flex-1">
-            <p className="text-lg font-extrabold tracking-[0.18em] text-[#0b3d6e] md:text-xl">
-              NYAYASETU
-            </p>
-            <p className="text-[11px] leading-snug text-muted-foreground md:text-xs">
-              National Scheme Matching Portal for Marginalized Entrepreneurs
-            </p>
+            <div className="flex items-center gap-2">
+              <img src="/logo.png" alt="NyayaSetu logo" className="h-12 w-12 object-contain md:h-14 md:w-14" />
+              <div>
+                <p className="text-lg font-extrabold tracking-[0.18em] text-[#0b3d6e] md:text-xl">
+                  NYAYASETU
+                </p>
+                <p className="text-[11px] leading-snug text-muted-foreground md:text-xs">
+                  National Scheme Matching Portal for Marginalized Entrepreneurs
+                </p>
+              </div>
+            </div>
           </div>
 
           <Button variant="outline" size="icon" onClick={onSearchFocus} aria-label={t(language, "searchByText")}>
