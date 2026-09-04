@@ -14,6 +14,7 @@ import { PartnerLocator } from "@/components/partner-locator"
 import { FinancialCalculator } from "@/components/financial-calculator"
 import { ASSISTANT_QUERY, NyayaAssistant } from "@/components/nyaya-assistant"
 import { usePreferences } from "@/hooks/use-preferences"
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition"
 import { filterSchemesByCoverage, getAllSchemes, matchSchemes } from "@/lib/schemes"
 import { t } from "@/data/translations"
 
@@ -22,6 +23,7 @@ const heroSlides = Array.from({ length: 15 }, (_, index) => ({ image: `/hero-${i
 
 export default function Page() {
   const { prefs, save, update } = usePreferences()
+  const { isListening, error: speechError, isSupported: speechSupported, startListening } = useSpeechRecognition()
 
   const [mode, setMode] = useState("voice")
   const [inputMethod, setInputMethod] = useState("voice")
@@ -167,6 +169,10 @@ export default function Page() {
         <OnboardingCard
           onComplete={completeProfile}
           onAutoFill={completeProfile}
+          isListening={isListening}
+          onStartListening={startListening}
+          speechError={speechError}
+          speechSupported={speechSupported}
         />
       )}
 
@@ -221,6 +227,10 @@ export default function Page() {
                   <VoiceScreen
                     language={language}
                     initialQuery={profileVoiceQuery}
+                    isListening={isListening}
+                    onStartListening={startListening}
+                    speechError={speechError}
+                    speechSupported={speechSupported}
                     onConfirm={(t) => {
                       runSearch(t)
                       setActiveTab("matches")
@@ -231,6 +241,10 @@ export default function Page() {
                   <TextScreen
                     language={language}
                     seed={textSeed}
+                    isListening={isListening}
+                    onStartListening={startListening}
+                    speechError={speechError}
+                    speechSupported={speechSupported}
                     onSearch={(q) => {
                       runSearch(q)
                       setActiveTab("matches")

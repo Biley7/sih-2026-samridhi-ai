@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react"
-import { Keyboard, Mic, Square } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Keyboard, Mic } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { t } from "@/data/translations"
+import { LANGUAGES } from "@/lib/languages"
 
 const SAMPLE_BY_LANG = {
   hi: "मुझे हैंडलूम बुनाई के लिए सब्सिडी चाहिए",
@@ -12,34 +13,25 @@ const SAMPLE_BY_LANG = {
   mr: "हँडलूम विणकामासाठी अनुदान हवे",
 }
 
-export function VoiceScreen({ language, initialQuery = "", onConfirm, onSwitchToText }) {
-  const [isListening, setIsListening] = useState(false)
+export function VoiceScreen({ language, initialQuery = "", onConfirm, onSwitchToText, isListening, onStartListening, speechError, speechSupported = true }) {
   const [transcript, setTranscript] = useState(initialQuery)
-  const [error, setError] = useState("")
-  const onConfirmRef = useRef(onConfirm)
-  onConfirmRef.current = onConfirm
+  const [voiceRecognized, setVoiceRecognized] = useState(false)
 
   useEffect(() => {
     setTranscript(initialQuery)
+    setVoiceRecognized(false)
   }, [initialQuery])
 
-  useEffect(() => {
-    if (!isListening) return undefined
-    const timer = window.setTimeout(() => {
-      const voiceQuery = "Main handloom weaver hoon, mujhe subsidy chahiye."
-      setTranscript(voiceQuery)
-      setIsListening(false)
-      onConfirmRef.current(voiceQuery)
-    }, 3000)
-    return () => window.clearTimeout(timer)
-  }, [isListening])
-
   function startListening() {
-    setError("")
-    setIsListening(true)
+    setVoiceRecognized(false)
+    onStartListening?.(language, (spokenText) => {
+      setTranscript(spokenText)
+      setVoiceRecognized(true)
+    })
   }
 
   const sample = SAMPLE_BY_LANG[language] || SAMPLE_BY_LANG.en
+  const languageLabel = LANGUAGES.find((item) => item.code === language)?.label || language
 
   return (
     <section className="rounded-xl border border-border bg-card p-5 md:p-6">
@@ -55,32 +47,49 @@ export function VoiceScreen({ language, initialQuery = "", onConfirm, onSwitchTo
           )}
           <button
             type="button"
-            onClick={() => setIsListening((current) => !current)}
+            onClick={startListening}
+            disabled={!speechSupported}
             className={`relative z-10 flex size-20 items-center justify-center rounded-full transition-colors ${
               isListening ? "animate-pulse bg-red-600 text-white" : "bg-surface text-primary shadow-sm"
-            }`}
+            } ${!speechSupported ? "cursor-not-allowed opacity-50" : ""}`}
             aria-pressed={isListening}
             aria-label={isListening ? t(language, "listening") : t(language, "useVoice")}
           >
-            {isListening ? <Square className="size-6" /> : <Mic className="size-8" />}
+            <Mic className="size-8" />
           </button>
         </div>
         <p className="mt-3 text-xs font-medium text-foreground">
           {isListening ? t(language, "listening") : t(language, "useVoice")}
         </p>
+        {!speechSupported && (
+          <p role="alert" className="mt-2 max-w-xs rounded-full bg-amber-100 px-3 py-1.5 text-center text-xs font-medium text-amber-800">
+            Voice input needs Google Chrome or Microsoft Edge. You can still type below.
+          </p>
+        )}
+        {speechError && (
+          <p role="alert" className="mt-2 max-w-xs rounded-full bg-red-100 px-3 py-1.5 text-center text-xs font-medium text-red-700">
+            ⚠️ {speechError}
+          </p>
+        )}
         <p className="mt-1 max-w-xs text-center text-[11px] leading-snug text-muted-foreground">
           {t(language, "voiceCaption")}
         </p>
       </div>
 
-      <p className="mt-4 min-h-12 rounded-lg bg-surface px-3 py-3 text-center text-sm">
-        {transcript || (
-          <span className="text-muted-foreground">
-            {t(language, "example")}: {sample}
-          </span>
-        )}
+      <textarea
+        value={transcript}
+        onChange={(e) => setTranscript(e.target.value)}
+        rows={3}
+        placeholder={`${t(language, "example")}: ${sample}`}
+        aria-label={t(language, "speakCraft")}
+        className="mt-4 w-full resize-none rounded-lg bg-surface px-3 py-3 text-center text-sm outline-none ring-ring focus:ring-2"
+      />
+      <p
+        role="status"
+        className={`mt-2 rounded-full px-3 py-1.5 text-center text-xs font-medium ${isListening ? "animate-pulse bg-red-100 text-red-700" : voiceRecognized && transcript.trim() ? "bg-emerald-100 text-emerald-700" : "hidden"}`}
+      >
+        {isListening ? `🎙️ Listening in ${languageLabel}... Speak now` : `✓ Recognized: '${transcript.trim()}'`}
       </p>
-      {error && <p className="mt-2 text-center text-xs text-primary">{error}</p>}
 
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <Button

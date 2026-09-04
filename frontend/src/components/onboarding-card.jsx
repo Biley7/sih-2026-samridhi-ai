@@ -5,7 +5,7 @@ import { DIGILOCKER_DEMO_PROFILES } from "@/lib/digilocker"
 import { LANGUAGES } from "@/lib/languages"
 import { t } from "@/data/translations"
 
-export function OnboardingCard({ onComplete, onAutoFill }) {
+export function OnboardingCard({ onComplete, onAutoFill, isListening, onStartListening }) {
   const [language, setLanguage] = useState("hi")
   const [defaultInput, setDefaultInput] = useState("voice")
   const [name, setName] = useState("")
@@ -14,6 +14,17 @@ export function OnboardingCard({ onComplete, onAutoFill }) {
   const [income, setIncome] = useState("")
   const [digiLockerLinked, setDigiLockerLinked] = useState(false)
   const [digiLockerOpen, setDigiLockerOpen] = useState(false)
+  const [activeVoiceField, setActiveVoiceField] = useState("")
+  const languageLabel = LANGUAGES.find((item) => item.code === language)?.label || language
+  const canSubmit = digiLockerLinked || (name.trim() && trade.trim())
+
+  function listenFor(field, setValue) {
+    setActiveVoiceField(field)
+    onStartListening?.(language, (transcript) => {
+      setValue(transcript)
+      setActiveVoiceField(field)
+    })
+  }
 
   function fillDigiLocker(profile) {
     setName(profile.name)
@@ -27,6 +38,7 @@ export function OnboardingCard({ onComplete, onAutoFill }) {
 
   function handleSubmit(e) {
     e.preventDefault()
+    if (!canSubmit) return
     onComplete({
       language,
       defaultInput,
@@ -40,10 +52,10 @@ export function OnboardingCard({ onComplete, onAutoFill }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/90 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/90 p-3">
       <form
         onSubmit={handleSubmit}
-        className="my-4 w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg"
+        className="my-3 w-full max-w-md max-h-[85vh] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl"
       >
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t(language, "welcome")}</p>
         <h2 className="mt-1 text-xl font-bold">{t(language, "onboardingTitle")}</h2>
@@ -52,7 +64,7 @@ export function OnboardingCard({ onComplete, onAutoFill }) {
         <Button
           type="button"
           variant="digilocker"
-          className="mt-5 w-full"
+          className="mt-4 h-9 w-full rounded-full px-3 text-xs"
           onClick={() => setDigiLockerOpen(true)}
         >
           <ShieldCheck className="size-4" />
@@ -64,31 +76,53 @@ export function OnboardingCard({ onComplete, onAutoFill }) {
           </p>
         )}
 
-        <div className="mt-4 grid gap-3">
+        <div className="mt-3 grid gap-3">
           <label className="block text-sm font-medium">
-            {t(language, "name")}
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="mt-1.5 h-11 w-full rounded-lg border border-border bg-background px-3 text-sm"
-              placeholder="Full name"
-            />
+            <span className="flex items-center justify-between">
+              {t(language, "name")}
+              <button
+                type="button"
+                onClick={() => listenFor("name", setName)}
+                className={`rounded-full p-2 text-primary transition-colors hover:bg-surface ${isListening ? "animate-pulse bg-red-600 text-white" : ""}`}
+                aria-label={isListening ? t(language, "listening") : t(language, "useVoice")}
+                title={t(language, "useVoice")}
+              >
+                <Mic className="size-4" />
+              </button>
+            </span>
+            <input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" placeholder="Full name" />
+            {activeVoiceField === "name" && (isListening || name.trim()) && (
+              <p role="status" className={`mt-1.5 rounded-full px-3 py-1 text-center text-xs font-medium ${isListening ? "animate-pulse bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"}`}>
+                {isListening ? `🎙️ Listening in ${languageLabel}... Speak now` : `✓ Recognized: '${name}'`}
+              </p>
+            )}
           </label>
           <label className="block text-sm font-medium">
-            {t(language, "trade")}
-            <input
-              value={trade}
-              onChange={(e) => setTrade(e.target.value)}
-              className="mt-1.5 h-11 w-full rounded-lg border border-border bg-background px-3 text-sm"
-              placeholder="e.g. Handloom Weaver"
-            />
+            <span className="flex items-center justify-between">
+              {t(language, "trade")}
+              <button
+                type="button"
+                onClick={() => listenFor("trade", setTrade)}
+                className={`rounded-full p-2 text-primary transition-colors hover:bg-surface ${isListening ? "animate-pulse bg-red-600 text-white" : ""}`}
+                aria-label={isListening ? t(language, "listening") : t(language, "useVoice")}
+                title={t(language, "useVoice")}
+              >
+                <Mic className="size-4" />
+              </button>
+            </span>
+            <input value={trade} onChange={(e) => setTrade(e.target.value)} className="mt-1 h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" placeholder="e.g. Handloom Weaver" />
+            {activeVoiceField === "trade" && (isListening || trade.trim()) && (
+              <p role="status" className={`mt-1.5 rounded-full px-3 py-1 text-center text-xs font-medium ${isListening ? "animate-pulse bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"}`}>
+                {isListening ? `🎙️ Listening in ${languageLabel}... Speak now` : `✓ Recognized: '${trade}'`}
+              </p>
+            )}
           </label>
           <label className="block text-sm font-medium">
             {t(language, "income")}
             <input
               value={income}
               onChange={(e) => setIncome(e.target.value)}
-              className="mt-1.5 h-11 w-full rounded-lg border border-border bg-background px-3 text-sm"
+              className="mt-1 h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
               placeholder="e.g. ₹1,80,000"
             />
           </label>
@@ -97,7 +131,7 @@ export function OnboardingCard({ onComplete, onAutoFill }) {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="mt-1.5 h-11 w-full rounded-lg border border-border bg-background px-3 text-sm"
+              className="mt-1 h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
             >
               <option>SC</option>
               <option>ST</option>
@@ -107,12 +141,12 @@ export function OnboardingCard({ onComplete, onAutoFill }) {
           </label>
         </div>
 
-        <label className="mt-4 block text-sm font-medium">
+        <label className="mt-3 block text-sm font-medium">
           {t(language, "language")}
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            className="mt-1.5 h-11 w-full rounded-lg border border-border bg-background px-3 text-sm"
+            className="mt-1 h-10 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
           >
             {LANGUAGES.map((lang) => (
               <option key={lang.code} value={lang.code}>
@@ -122,12 +156,12 @@ export function OnboardingCard({ onComplete, onAutoFill }) {
           </select>
         </label>
 
-        <p className="mt-4 text-sm font-medium">{t(language, "defaultInputLabel")}</p>
+        <p className="mt-3 text-sm font-medium">{t(language, "defaultInputLabel")}</p>
         <div className="mt-2 grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={() => setDefaultInput("voice")}
-            className={`rounded-lg border px-3 py-3 text-left text-sm transition-colors ${
+            className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
               defaultInput === "voice"
                 ? "border-primary bg-surface text-foreground"
                 : "border-border bg-background text-muted-foreground"
@@ -139,7 +173,7 @@ export function OnboardingCard({ onComplete, onAutoFill }) {
           <button
             type="button"
             onClick={() => setDefaultInput("text")}
-            className={`rounded-lg border px-3 py-3 text-left text-sm transition-colors ${
+            className={`rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
               defaultInput === "text"
                 ? "border-primary bg-surface text-foreground"
                 : "border-border bg-background text-muted-foreground"
@@ -150,8 +184,8 @@ export function OnboardingCard({ onComplete, onAutoFill }) {
           </button>
         </div>
 
-        <Button type="submit" className="mt-6 w-full">
-          {t(language, "continue")}
+        <Button type="submit" disabled={!canSubmit} className="mt-4 w-full">
+          {t(language, "saveDiscover")}
         </Button>
       </form>
 
@@ -167,17 +201,16 @@ export function OnboardingCard({ onComplete, onAutoFill }) {
                 <X className="size-4" />
               </button>
             </div>
-            <div className="mt-4 space-y-3">
-              {DIGILOCKER_DEMO_PROFILES.map((profile, index) => (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {DIGILOCKER_DEMO_PROFILES.map((profile) => (
                 <button
                   key={profile.name}
                   type="button"
                   onClick={() => fillDigiLocker(profile)}
-                  className="w-full rounded-xl border border-slate-200 p-4 text-left transition hover:border-blue-500 hover:bg-blue-50"
+                  className="flex-1 rounded-full border border-slate-200 px-3 py-2 text-left transition hover:border-blue-500 hover:bg-blue-50"
                 >
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Profile {index + 1}</p>
-                  <p className="mt-1 font-semibold text-[#0b3d6e]">{profile.name}</p>
-                  <p className="mt-1 text-sm text-slate-600">{profile.trade} · {profile.category} · {profile.income}</p>
+                  <p className="text-xs font-semibold text-[#0b3d6e]">{profile.name}</p>
+                  <p className="text-[11px] text-slate-600">{profile.trade} · {profile.category}</p>
                 </button>
               ))}
             </div>
