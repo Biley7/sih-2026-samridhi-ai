@@ -1,45 +1,79 @@
 "use client"
 
-import { useCallback, useMemo, useRef, useState } from "react"
-import { ArrowLeft, Mic, Settings2, WifiOff } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { ArrowLeft, MessageCircle, Mic, Settings2, WifiOff } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { OnboardingCard } from "@/components/onboarding-card"
+import { ProfileStrip } from "@/components/profile-strip"
 import { VoiceScreen } from "@/components/voice-screen"
 import { TextScreen } from "@/components/text-screen"
 import { ResultsPreview } from "@/components/results-preview"
 import { MetricCards } from "@/components/metric-cards"
+import { Footer } from "@/components/Footer"
+import { PartnerLocator } from "@/components/partner-locator"
+import { FinancialCalculator } from "@/components/financial-calculator"
+import { ASSISTANT_QUERY, NyayaAssistant } from "@/components/nyaya-assistant"
 import { usePreferences } from "@/hooks/use-preferences"
-import { matchSchemes, type InputMode, type MetricCard, type Scheme } from "@/lib/schemes"
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition"
+import { filterSchemesByCoverage, getAllSchemes, matchSchemes } from "@/lib/schemes"
+import { t } from "@/data/translations"
 
-type Phase = "input" | "loading" | "results"
+const MATCH_QUERY = "Handloom Weaver"
+const heroSlides = Array.from({ length: 15 }, (_, index) => ({ image: `/hero-${index + 1}.jpeg` }))
 
 export default function Page() {
-  const { prefs, hydrated, save, update } = usePreferences()
+  const { prefs, save, update } = usePreferences()
+  const { isListening, error: speechError, isSupported: speechSupported, startListening } = useSpeechRecognition()
 
-  const [mode, setMode] = useState<InputMode>("voice")
-  const [phase, setPhase] = useState<Phase>("input")
+  const [mode, setMode] = useState("voice")
+  const [inputMethod, setInputMethod] = useState("voice")
+  const [phase, setPhase] = useState("input")
   const [query, setQuery] = useState("")
-  const [results, setResults] = useState<Scheme[]>([])
-  const [textSeed, setTextSeed] = useState<string | undefined>(undefined)
+  const [results, setResults] = useState([])
+  const [textSeed, setTextSeed] = useState(undefined)
   const [compact, setCompact] = useState(false)
-  const [activeMetric, setActiveMetric] = useState<MetricCard["key"] | null>(null)
-  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [activeMetric, setActiveMetric] = useState(null)
+  const [activeTab, setActiveTab] = useState("voice")
+  const [assistantOpen, setAssistantOpen] = useState(false)
+  const [isProfileSet, setIsProfileSet] = useState(false)
+  const [profileVoiceQuery, setProfileVoiceQuery] = useState("")
+  const [slideIndex, setSlideIndex] = useState(0)
+  const searchTimer = useRef(null)
 
-  // Sync local mode with saved preference once known.
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setSlideIndex((current) => (current + 1) % heroSlides.length)
+    }, 5000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    heroSlides.forEach((slide) => {
+      const image = new Image()
+      image.src = slide.image
+    })
+  }, [])
+
   const initialisedMode = useRef(false)
   if (prefs && !initialisedMode.current) {
     initialisedMode.current = true
     setMode(prefs.defaultInput)
+    setInputMethod(prefs.defaultInput)
   }
 
   const runSearch = useCallback(
-    (q: string) => {
+    (q, options = {}) => {
+      const instant = Boolean(options.instant)
       setQuery(q)
-      setPhase("loading")
       setActiveMetric(null)
       update({ lastSearch: q })
       if (searchTimer.current) clearTimeout(searchTimer.current)
+      if (instant) {
+        setResults(matchSchemes(q).slice(0, 3))
+        setPhase("results")
+        return
+      }
+      setPhase("loading")
       searchTimer.current = setTimeout(() => {
         setResults(matchSchemes(q))
         setPhase("results")
@@ -48,7 +82,7 @@ export default function Page() {
     [update],
   )
 
-  const highlightIssuer = useMemo<"Central" | "State" | null>(() => {
+  const highlightIssuer = useMemo(() => {
     if (activeMetric === "central") return "Central"
     if (activeMetric === "state") return "State"
     return null
@@ -60,24 +94,85 @@ export default function Page() {
     setResults([])
     setTextSeed(undefined)
     setActiveMetric(null)
+    setActiveTab("voice")
   }
 
-  function switchToText(seed?: string) {
-    setTextSeed(seed)
+  function switchToText(seed) {
+    setInputMethod("text")
     setMode("text")
-    if (seed) runSearch(seed)
+    setTextSeed(seed)
+    setPhase("input")
+    setActiveTab("voice")
+  }
+
+  function completeProfile(profile) {
+    save({
+      ...profile,
+      language: profile.language ?? prefs?.language ?? "hi",
+      defaultInput: profile.defaultInput ?? prefs?.defaultInput ?? "voice",
+      lastSearch: "",
+    })
+    const nextInputMethod = profile.defaultInput ?? prefs?.defaultInput ?? "voice"
+    setMode(nextInputMethod)
+    setInputMethod(nextInputMethod)
+    setProfileVoiceQuery(
+      profile.name === "Sunita Devi"
+        ? "I need a subsidy for my handloom weaving unit"
+        : "I need a concessional loan for my leather craft business",
+    )
+    setActiveTab("voice")
+    setPhase("input")
+    setIsProfileSet(true)
+  }
+
+  function handleTabChange(tabId) {
+    setActiveTab(tabId)
+    if (tabId === "voice") {
+      const nextInputMethod = inputMethod === "text" ? "text" : "voice"
+      setMode(nextInputMethod)
+      setInputMethod(nextInputMethod)
+      setPhase("input")
+    }
+    if (tabId === "matches" && results.length === 0) {
+      runSearch(MATCH_QUERY, { instant: true })
+    }
+  }
+
+  function handleCoverageSelect(key) {
+    setActiveMetric((prev) => (prev === key ? null : key))
+    setActiveTab("matches")
+  }
+
+  function viewAssistantSchemes() {
+    setAssistantOpen(false)
+    setActiveTab("matches")
+    runSearch(ASSISTANT_QUERY, { instant: true })
   }
 
   const language = prefs?.language ?? "hi"
+  const coverageLabels = {
+    central: t(language, "centralSchemes"),
+    state: t(language, "stateSchemes"),
+    artisans: t(language, "craftWeaver"),
+    credit: t(language, "creditSubsidy"),
+  }
+  const matchResults = activeMetric
+    ? filterSchemesByCoverage(getAllSchemes(), activeMetric)
+    : results.length
+      ? results
+      : matchSchemes(MATCH_QUERY).slice(0, 3)
+  const matchQuery = activeMetric ? coverageLabels[activeMetric] : query || MATCH_QUERY
 
   return (
-    <div className="min-h-dvh bg-background">
-      {hydrated && !prefs && (
+    <div id="top" className="artisan-backdrop relative min-h-dvh">
+      {!isProfileSet && (
         <OnboardingCard
-          onComplete={(p) => {
-            save(p)
-            setMode(p.defaultInput)
-          }}
+          onComplete={completeProfile}
+          onAutoFill={completeProfile}
+          isListening={isListening}
+          onStartListening={startListening}
+          speechError={speechError}
+          speechSupported={speechSupported}
         />
       )}
 
@@ -87,99 +182,184 @@ export default function Page() {
         compact={compact}
         onToggleCompact={() => setCompact((c) => !c)}
         onSearchFocus={() => {
+          setInputMethod("text")
           setMode("text")
           setPhase("input")
+          setActiveTab("voice")
         }}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
       />
 
-      <main className="mx-auto max-w-3xl px-4 pb-16 md:px-6">
-        {/* Hero */}
-        {phase === "input" && !compact && (
-          <section className="pt-8 text-center md:pt-12">
-            <h1 className="text-balance text-2xl font-bold tracking-tight md:text-4xl">
-              Find government schemes for your craft
-            </h1>
-            <p className="mx-auto mt-3 max-w-xl text-pretty text-sm text-muted-foreground md:text-base">
-              Ask in your own language by voice or text. NyayaSetu AI matches artisans, weavers,
-              and small entrepreneurs to subsidies that fit.
-            </p>
-          </section>
+      <main className="relative mx-auto max-w-3xl px-4 pb-16 md:px-6">
+        {activeTab === "voice" && (
+          <>
+            {phase === "input" && !compact && (
+              <section
+                className="relative isolate mt-6 overflow-hidden rounded-2xl px-5 py-12 text-center text-white shadow-xl md:mt-8 md:py-16"
+                style={{ backgroundImage: `url(${heroSlides[slideIndex].image})`, backgroundPosition: "center", backgroundSize: "cover" }}
+              >
+                <div className="absolute inset-0 -z-10 bg-slate-900/60" />
+                <h1 className="text-balance text-2xl font-extrabold tracking-[0.16em] md:text-4xl">NYAYASETU</h1>
+                <p className="mx-auto mt-3 max-w-xl text-pretty text-lg font-semibold md:text-xl">{t(language, "heroHeadline")}</p>
+                <p className="mx-auto mt-2 max-w-xl text-pretty text-sm text-slate-100 md:text-base">{t(language, "heroSubtitle")}</p>
+              </section>
+            )}
+
+            {phase === "input" && prefs && (
+              <div className="mt-6">
+                <ProfileStrip
+                  profile={prefs}
+                  language={language}
+                  onDigiLocker={(e) => {
+                    e.stopPropagation()
+                    setIsProfileSet(false)
+                  }}
+                />
+              </div>
+            )}
+
+            {compact && <CompactBanner language={language} />}
+
+            <div className="mt-4">
+              {phase === "input" ? (
+                mode === "voice" ? (
+                  <VoiceScreen
+                    language={language}
+                    initialQuery={profileVoiceQuery}
+                    isListening={isListening}
+                    onStartListening={startListening}
+                    speechError={speechError}
+                    speechSupported={speechSupported}
+                    onConfirm={(t) => {
+                      runSearch(t)
+                      setActiveTab("matches")
+                    }}
+                    onSwitchToText={(seed) => switchToText(seed)}
+                  />
+                ) : (
+                  <TextScreen
+                    language={language}
+                    seed={textSeed}
+                    isListening={isListening}
+                    onStartListening={startListening}
+                    speechError={speechError}
+                    speechSupported={speechSupported}
+                    onSearch={(q) => {
+                      runSearch(q)
+                      setActiveTab("matches")
+                    }}
+                    onSwitchToVoice={() => setMode("voice")}
+                  />
+                )
+              ) : (
+                <div className="pt-4">
+                  <button
+                    type="button"
+                    onClick={newSearch}
+                    className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <ArrowLeft className="size-4" aria-hidden />
+                    {t(language, "newSearch")}
+                  </button>
+                  <ResultsPreview
+                    loading={phase === "loading"}
+                    query={query}
+                    results={results}
+                    highlightIssuer={highlightIssuer}
+                    language={language}
+                    onChipSelect={(chip) => runSearch(chip)}
+                  />
+                </div>
+              )}
+            </div>
+
+            <section className="mt-8" aria-label={t(language, "schemeCoverage")}>
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-muted-foreground">{t(language, "schemeCoverage")}</h2>
+              </div>
+              <MetricCards
+                compact={compact}
+                activeKey={activeMetric}
+                language={language}
+                onSelect={handleCoverageSelect}
+              />
+            </section>
+
+            {phase === "input" && (
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <Settings2 className="size-3.5" aria-hidden />
+                  {t(language, "defaultInput")}:{" "}
+                  <span className="font-semibold text-foreground">{prefs?.defaultInput ?? inputMethod}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const selectedInput = inputMethod || mode
+                    setInputMethod(selectedInput)
+                    setMode(selectedInput)
+                    update({ defaultInput: selectedInput })
+                  }}
+                  className="rounded-full border border-border px-2.5 py-1 font-medium transition-colors hover:border-primary hover:text-foreground"
+                >
+                  {t(language, "setAsDefault")}
+                </button>
+              </div>
+            )}
+          </>
         )}
 
-        {compact && <CompactBanner />}
-
-        {/* Input / Results */}
-        <div className="mt-4">
-          {phase === "input" ? (
-            mode === "voice" ? (
-              <VoiceScreen
-                language={language}
-                onConfirm={(t) => runSearch(t)}
-                onSwitchToText={(seed) => switchToText(seed)}
-              />
-            ) : (
-              <TextScreen
-                language={language}
-                seed={textSeed}
-                onSearch={(q) => runSearch(q)}
-                onSwitchToVoice={() => setMode("voice")}
-              />
-            )
-          ) : (
-            <div className="pt-4">
-              <button
-                type="button"
-                onClick={newSearch}
-                className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <ArrowLeft className="size-4" aria-hidden />
-                New search
-              </button>
+        {activeTab === "matches" && (
+          <div className="pt-6">
+            <h2 className="text-xl font-bold text-[#0b3d6e]">{t(language, "matchesTitle")}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{t(language, "matchesSubtitle")}</p>
+            <div className="mt-4">
               <ResultsPreview
-                loading={phase === "loading"}
-                query={query}
-                results={results}
+                loading={false}
+                query={matchQuery}
+                results={matchResults}
                 highlightIssuer={highlightIssuer}
-                onChipSelect={(chip) => runSearch(chip)}
+                coverageFilter={activeMetric}
+                language={language}
+                onChipSelect={(chip) => runSearch(chip, { instant: true })}
               />
             </div>
-          )}
-        </div>
-
-        {/* Metric cards */}
-        <section className="mt-8" aria-label="Scheme coverage">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-muted-foreground">Scheme coverage</h2>
-            {phase === "results" && activeMetric && (
-              <span className="text-xs text-primary">Filtering results by tap</span>
-            )}
-          </div>
-          <MetricCards
-            compact={compact}
-            activeKey={activeMetric}
-            onSelect={(key) => {
-              setActiveMetric((prev) => (prev === key ? null : key))
-            }}
-          />
-        </section>
-
-        {/* Mode / preference quick switch */}
-        {phase === "input" && (
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <Settings2 className="size-3.5" aria-hidden />
-              Default input: <span className="font-semibold text-foreground">{prefs?.defaultInput ?? mode}</span>
-            </span>
-            <button
-              type="button"
-              onClick={() => update({ defaultInput: mode })}
-              className="rounded-full border border-border px-2.5 py-1 font-medium transition-colors hover:border-primary hover:text-foreground"
-            >
-              Set current as default
-            </button>
+            <section className="mt-8" aria-label={t(language, "schemeCoverage")}>
+              <h3 className="mb-3 text-sm font-semibold text-muted-foreground">{t(language, "schemeCoverage")}</h3>
+              <MetricCards
+                compact={compact}
+                activeKey={activeMetric}
+                language={language}
+                onSelect={handleCoverageSelect}
+              />
+            </section>
           </div>
         )}
+
+        {activeTab === "partners" && <PartnerLocator language={language} />}
+
+        {activeTab === "calculator" && <FinancialCalculator language={language} />}
       </main>
+
+      <Footer />
+
+      <NyayaAssistant
+        open={assistantOpen}
+        onOpen={() => setAssistantOpen(true)}
+        onClose={() => setAssistantOpen(false)}
+        onViewSchemes={viewAssistantSchemes}
+      />
+
+      <a
+        href="https://wa.me/911800110031"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Chat with NyayaSetu on WhatsApp"
+        className="fixed bottom-6 left-6 z-40 flex size-14 items-center justify-center overflow-hidden rounded-full bg-white shadow-lg ring-2 ring-white transition hover:scale-105"
+      >
+        <img src="/whatsapp-logo.jpeg" alt="WhatsApp support" className="h-full w-full object-cover" />
+      </a>
     </div>
   )
 }
