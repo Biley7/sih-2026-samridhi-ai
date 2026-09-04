@@ -12,7 +12,7 @@
 # 2. JSON/Java DTO Fields: camelCase (e.g., annualIncome, projectCost)
 # 3. PostgreSQL Columns: snake_case (e.g., annual_income, project_cost)
 # 4. Local Execution Ports:
-#    - Spring Boot Backend: http://localhost:8080
+#    - Spring Boot Backend: https://nyayasetu-backend-haaj.onrender.com
 #    - React Vite Frontend: http://localhost:5173
 
 # --- BACKEND RULES (Java Spring Boot) ---
